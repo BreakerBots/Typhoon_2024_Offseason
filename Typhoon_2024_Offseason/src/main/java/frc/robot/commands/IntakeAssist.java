@@ -90,10 +90,10 @@ public class IntakeAssist extends Command {
     SwerveDriveState state = drive.getState();
     BreakerVector2 filteredDriverReqVec = new BreakerVector2(xStreamFiltered.get(), yStreamFiltered.get());
     for (TrackedObject obj : zed.getTrackedObjects()) {
-      if (obj.label == "note" && obj.isVisible)  {
-       double distErr = obj.globalObjectPosition.toTranslation2d().getDistance(state.Pose.getTranslation());
+      if (obj.label() == "note" && obj.isVisible())  {
+       double distErr = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
        double errorBound = 0.5;
-       double rawVecAngErr = filteredDriverReqVec.getVectorRotation().getRotations() - obj.robotToObjectTranslation.toTranslation2d().getAngle().getRotations();
+       double rawVecAngErr = filteredDriverReqVec.getVectorRotation().getRotations() - obj.position().getRobotToObject(true).toTranslation2d().getAngle().getRotations();
        double angErr = Math.abs(MathUtil.inputModulus(rawVecAngErr, -errorBound, errorBound));
        double errScore = (angErr * ANGLE_ERROR_SCAILAR) * (distErr * DIST_ERROR_SCAILAR);
        if (errScore <= MAX_ERROR_SCORE && angErr <= MAX_ANGLE_ERROR && distErr <= MAX_DIST_ERROR) {
@@ -108,10 +108,10 @@ public class IntakeAssist extends Command {
     double omegaOut = omegaStream.get();
     if (bestNote.isPresent() && Math.abs(omegaOut) < TOTAL_DISENGAGE_OMEGA_THRESH && Math.hypot(xOut, yOut) >= MIN_ACTIVE_TRANSLATIONAL_INPUT ) {
       TrackedObject obj = bestNote.get().getFirst();
-      double dist = obj.globalObjectPosition.toTranslation2d().getDistance(state.Pose.getTranslation());
+      double dist = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
       var reqVec = new BreakerVector2(xOut, yOut).rotateBy(drive.getOperatorForwardDirection());
       double pidOut = linearPID.calculate(dist, 0.0);
-      Rotation2d angToNote = BreakerMath.getPointAngleRelativeToOtherPoint(state.Pose.getTranslation(), obj.globalObjectPosition.toTranslation2d());
+      Rotation2d angToNote = BreakerMath.getPointAngleRelativeToOtherPoint(state.Pose.getTranslation(), obj.position().getGlobal(true).toTranslation2d());
       var pidVec = new BreakerVector2(angToNote, pidOut);
       var linearCorectionVec = reqVec.getUnitVector().minus(pidVec.getUnitVector()).times(pidOut);
       var linOutputVec = reqVec.plus(linearCorectionVec).clampMagnitude(0.0, Constants.DriveConstants.MAXIMUM_TRANSLATIONAL_VELOCITY.in(Units.MetersPerSecond));

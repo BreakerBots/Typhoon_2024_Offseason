@@ -5,28 +5,47 @@
 package frc.robot;
 
 import java.io.InputStream;
+import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
+import frc.robot.commands.IntakeAndHold;
+import frc.robot.commands.IntakeAssist;
+import frc.robot.commands.IntakeForShooter;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.IntakePivotState;
+import frc.robot.subsystems.Intake.IntakeState;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterTarget;
+import frc.robot.subsystems.vision.ZED;
 import monologue.Logged;
 import monologue.Monologue;
 
 public class RobotContainer implements Logged {
-  private final BreakerXboxController controller = new BreakerXboxController(0);
+  public static final BreakerXboxController controller = new BreakerXboxController(0);
   private final Intake intake = new Intake();
+  private final Shooter shooter = new Shooter();
+  private final Hopper hopper = new Hopper();
   private final Drivetrain drivetrain = new Drivetrain();
+  private final ZED zed = new ZED();
+
   private BreakerInputStream driverX, driverY, driverOmega;
   private SwerveRequest.FieldCentric teleopSwerveRequest;
+  private final ShooterTarget SPEAKER = new ShooterTarget(drivetrain, shooter, hopper);
   public RobotContainer() {
+    shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
     boolean fileOnly = false;
     boolean lazyLogging = false;
@@ -56,6 +75,42 @@ public class RobotContainer implements Logged {
 
     teleopSwerveRequest = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.Velocity);
     drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> teleopSwerveRequest.withVelocityX(driverX.get()).withVelocityY(driverY.get()).withRotationalRate(driverOmega.get())));
+
+    BooleanSupplier hasNoNote = () -> !intake.hasNote() && !hopper.hasNote();
+    BooleanSupplier intakeOnlyHasNote = () -> intake.hasNote() && !hopper.hasNote();
+    BooleanSupplier hopperOnlyHasNote = () -> !intake.hasNote() && hopper.hasNote();
+    BooleanSupplier errorState = () -> intake.hasNote() && hopper.hasNote();
+    Trigger globalOverride = controller.getStartButton();
+
+    Command conditionalIntakeAssist = new ConditionalCommand(Commands.print("Intake Assist Overridden"), new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), globalOverride);
+
+    // AMP CONTROLS
+    controller.getLeftBumper()//intake amp
+      .and(hasNoNote)
+      .onTrue(new IntakeAndHold(intake, true).deadlineWith(conditionalIntakeAssist));
+    controller.getLeftBumper()//handoff from hopper to intake
+      .and(hopperOnlyHasNote)
+      .onTrue(null);
+    controller.getLeftBumper()//score amp
+      .and(intakeOnlyHasNote)
+      .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
+      .onTrue(null);
+    controller.getLeftBumper()//prep for amp score
+      .and(intakeOnlyHasNote)
+      .and(() -> intake.getState().getPivotState() != IntakePivotState.RETRACTED)
+      .onTrue(intake.setStateCommand(IntakeState.RETRACTED_NEUTRAL, false));
+
+    // SHOOTER CONTROLS
+    controller.getRightBumper()//intake shooter
+      .and(hasNoNote)
+      .onTrue(new IntakeForShooter(intake, hopper, shooter).deadlineWith(conditionalIntakeAssist));
+    controller.getRightBumper()//handoff from intake to hopper
+      .and(intakeOnlyHasNote)
+      .onTrue(null);
+    controller.getRightBumper()
+      .and(hopperOnlyHasNote)
+      .onTrue(SPEAKER.shootWhileMoveing(driverX, driverY));
+
   
   }
   public Command getAutonomousCommand() {

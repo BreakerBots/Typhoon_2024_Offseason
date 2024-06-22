@@ -13,6 +13,9 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -24,11 +27,19 @@ import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import frc.robot.BreakerLib.swerve.BreakerSwerveDrivetrain.BreakerSwerveDrivetrainConstants;
 import frc.robot.BreakerLib.util.MechanismRatio;
+import frc.robot.subsystems.shooter.Shooter.ShooterState;
 
 public class Constants {
 
   public static class GeneralConstants {
     public static final String DRIVE_CANIVORE_NAME = "drive_canivore";
+  }
+
+  public static class FieldConstants {
+        public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        public static final double FIELD_WIDTH = APRILTAG_FIELD_LAYOUT.getFieldWidth();
+        public static final double FIELD_LENGTH = APRILTAG_FIELD_LAYOUT.getFieldLength();
+
   }
 
   public static class DriverConstants {
@@ -39,14 +50,25 @@ public class Constants {
   public static class ShooterConstants {
         public static final MechanismRatio FLYWHEEL_RATIO = new MechanismRatio();
         public static final MechanismRatio PIVOT_RATIO = new MechanismRatio(9.0).to(new MechanismRatio(20, 440));
-        public static final Translation3d ROBOT_TO_PIVOT_AXEL_TRANS = new Translation3d(0.0, 0.0, 0.0);
-        public static final Translation3d PIVOT_AXEL_TO_FLYWHEEL_TRANS = new Translation3d(-0.0, 0.0, 0.0);
           /**
          * The conversion between shooter tangential velocity and note launch velocity.
          */
         public static final double NOTE_LAUCH_VEL_LOSS_SCAILAR = 4.75;
-        public static final boolean ENABLE_SOLUTION_ITTERATION = true;
         public static final Measure<Distance> FLYWHEEL_RADIUS = Units.Inches.of(2.0);
+        public static final Translation3d PIVOT_AXEL_TO_FLYWHEEL_TRANS = new Translation3d(-0.0, 0.0, 0.0);
+        public static final Translation3d ROBOT_TO_PIVOT_AXEL_TRANS = new Translation3d(0.0, 0.0, 0.0);
+
+        public static final Measure<Velocity<Angle>> MIN_VEL = Units.RotationsPerSecond.of(0.0);
+        public static final Measure<Velocity<Angle>> MAX_VEL = Units.RotationsPerSecond.of(100.0);
+
+        public static final Rotation2d STOW_ANGLE =  Rotation2d.fromRotations(0.016);
+        public static final Rotation2d MIN_ANGLE =  Rotation2d.fromRotations(0.016);
+        public static final Rotation2d MAX_ANGLE =  Rotation2d.fromRotations(0.016);
+        public static final Rotation2d INTAKE_HANDOFF_ANGLE = Rotation2d.fromRotations(0.016);
+        public static final ShooterState INTAKE_HANDOFF_STATE = new ShooterState(INTAKE_HANDOFF_ANGLE, Units.RadiansPerSecond.of(0.0));
+
+        public static final double SHOOT_ON_THE_MOVE_DRIVER_INPUT_SCAILAR = 0.3;
+        public static final double SHOOT_ON_THE_MOVE_DRIVER_INPUT_RATE_LIMIT = 1.0;
         
   }
   

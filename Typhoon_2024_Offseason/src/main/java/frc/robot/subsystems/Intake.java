@@ -226,7 +226,7 @@ public class Intake extends SubsystemBase implements Logged {
     }
 
     if (RobotState.isTeleop() && beamBreak.hasChanged() && beamBreak.isBroken()) {
-      new BreakerGamepadTimedRumbleCommand(RobotContainer.controllerSys, 1.5, 0.75, 0.75).schedule();;
+      new BreakerGamepadTimedRumbleCommand(RobotContainer.controller, 1.5, 0.75, 0.75).schedule();;
     } 
     
     if (!isPivotAmpCurrentLimited && targetState.isInAmpState() && isAmpLimitTriggered()) {

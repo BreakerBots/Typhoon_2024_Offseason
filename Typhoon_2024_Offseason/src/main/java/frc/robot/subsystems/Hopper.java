@@ -7,8 +7,10 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
 
@@ -57,6 +59,13 @@ public class Hopper extends SubsystemBase {
     this.state = state;
     hopperMotor.set(state.getDutyCycle());
     hopperMotor.overrideLimitSwitchesEnable(state.getStopOnBeamBreakTrigger());
+  }
+
+  public Command feedFlywheel() {
+    return setStateCommand(HopperState.HOPPER_TO_FLYWHEEL).andThen(
+      new WaitUntilCommand(() -> !hasNote()),
+      new WaitCommand(0.1)
+    );
   }
 
   @Override

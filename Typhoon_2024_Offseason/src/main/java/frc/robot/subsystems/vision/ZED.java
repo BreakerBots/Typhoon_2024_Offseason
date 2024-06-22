@@ -38,7 +38,17 @@ public class ZED extends SubsystemBase {
       
     }
 
-    public Translation3d get
+    public Translation3d getCameraToObject(boolean compensateForLatency) {
+      return null;
+    }
+
+    public Translation3d getRobotToObject(boolean compensateForLatency) {
+      return null;
+    }
+
+    public Translation3d getGlobal(boolean compensateForLatency) {
+      return null;
+    }
   }
 
   @Override
@@ -47,16 +57,15 @@ public class ZED extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-   public static class TrackedObject implements StructSerializable {
-    public final int objectID;
-    public final String label;
-    public final double timestamp;
-    public final BreakerVector3 velocity;
-    public final ObjectPosition position;
-    public final ObjectDimensions cameraRelitiveDimensions;
-    public final double confidance;
-    public final boolean isVisible;
-    public final boolean isMoveing;
-  }
-
+   public static final record TrackedObject(
+    int objectID, 
+    String label,
+    double timestamp,
+    BreakerVector3 velocity,
+    ObjectPosition position,
+    ObjectDimensions cameraRelitiveDimensions,
+    double confidance,
+    boolean isVisible,
+    boolean isMoveing
+    ) {} 
 }
