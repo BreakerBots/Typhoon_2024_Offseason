@@ -11,11 +11,14 @@ import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import javax.swing.text.Position;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -37,8 +40,11 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.BreakerLib.physics.BreakerVector3;
+import frc.robot.BreakerLib.physics.ChassisAccels;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Constants.ShooterConstants.*;
@@ -53,25 +59,53 @@ public class Shooter extends SubsystemBase {
   private CoastOut flywheelCoastRequest;
   private Follower flywheelFollowRequest;
   private MotionMagicVoltage pitchMotionMagicRequest;
+  private PositionVoltage pitchPositionRequest;
+
+  private PitchControlType pitchControlType;
+  private Rotation2d lastPitchSetpointOutsideOfEpsilon;
 
   private ShooterState setpoint;
-  public Shooter() {
+  private Supplier<ChassisAccels> robotAccelSupplier;
+  public Shooter(Supplier<ChassisAccels> robotAccelSupplier) {
+    this.robotAccelSupplier = robotAccelSupplier;
   }
 
-  public void setState(ShooterState state) {
-    setpoint = state.clamp();
-    double flywheelVelSetpoint = setpoint.flywheelVel().in(Units.RevolutionsPerSecond);
+  private static enum PitchControlType {
+    POSITION,
+    MOTION_MAGIC
+  }
+
+  private void setState(ShooterState state) {
+    state = state.clamp();
+    double flywheelVelSetpoint = state.flywheelVel().in(Units.RevolutionsPerSecond);
     ControlRequest flywheelRequest = flywheelVelocityRequest.withVelocity(flywheelVelSetpoint);
     if (MathUtil.isNear(flywheelVelSetpoint, 0.0, 1e-5)) {
       flywheelRequest = flywheelCoastRequest;
     }
     flywheelLeft.setControl(flywheelRequest);
     flywheelRight.setControl(flywheelFollowRequest);
-    pivot.setControl(pitchMotionMagicRequest.withPosition(setpoint.pitchAngle.getRotations()));
+
+    boolean oustideControlTypeSwitchThreshFromPrev = !MathUtil.isNear(state.pitchAngle.getRotations(), lastPitchSetpointOutsideOfEpsilon.getRotations(), PITCH_SETPOINT_CONTROL_TYPE_SWITCH_EPSILON.in(Units.Rotations), -0.5, 0.5);
+    if (oustideControlTypeSwitchThreshFromPrev) {
+      lastPitchSetpointOutsideOfEpsilon = state.pitchAngle;
+    }
+
+    boolean isToCloseForMotionMagic = MathUtil.isNear(state.pitchAngle.getRotations(), getCurrentState().pitchAngle.getRotations(), MOTION_MAGIC_MIN_DIST.in(Units.Rotations), -0.5, 0.5);;
+    
+    double robotAccelFeedforward = robotAccelSupplier.get().axMetersPerSecondSquared * PIVOT_kX;
+
+    if (isToCloseForMotionMagic && ((oustideControlTypeSwitchThreshFromPrev && pitchControlType == PitchControlType.MOTION_MAGIC) || pitchControlType == PitchControlType.POSITION)) {
+      pivot.setControl(pitchPositionRequest.withPosition(state.pitchAngle.getRotations()).withFeedForward(robotAccelFeedforward));
+      pitchControlType = PitchControlType.POSITION;
+    } else {
+      pivot.setControl(pitchMotionMagicRequest.withPosition(state.pitchAngle.getRotations()).withFeedForward(robotAccelFeedforward));
+      pitchControlType = PitchControlType.MOTION_MAGIC;
+    }
+    setpoint = state;
   }
 
   public Command setStateCommand(ShooterState state, boolean waitForSuccess) {
-    
+    return Commands.runOnce(() -> setState(state), this).andThen(new WaitUntilCommand(() -> {return atSetpoint() || !waitForSuccess;}));
   }
 
   public Command runShooter(Supplier<ShooterState> stateSupplier) {

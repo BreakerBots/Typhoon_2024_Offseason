@@ -67,8 +67,29 @@ public class Constants {
         public static final Rotation2d INTAKE_HANDOFF_ANGLE = Rotation2d.fromRotations(0.016);
         public static final ShooterState INTAKE_HANDOFF_STATE = new ShooterState(INTAKE_HANDOFF_ANGLE, Units.RadiansPerSecond.of(0.0));
 
+        //control constants
+        public static final Measure<Angle> PITCH_SETPOINT_CONTROL_TYPE_SWITCH_EPSILON = Units.Degrees.of(0.002);
+        public static final Measure<Angle> MOTION_MAGIC_MIN_DIST = Units.Degrees.of(6.0);
+
+        //feedforward
+        public static final double PIVOT_kV = 0.0;
+        public static final double PIVOT_kA = 0.0;
+        public static final double PIVOT_kS = 0.0;
+        public static final double PIVOT_kG = 0.0;
+        public static final double PIVOT_kX = 0.0;
+
+        public static final double PIVOT_MOTION_MAGIC_kP = 0.0;
+        public static final double PIVOT_MOTION_MAGIC_kI = 0.0;
+        public static final double PIVOT_MOTION_MAGIC_kD = 0.0;
+
+        public static final double PIVOT_POSITION_kP = 0.0;
+        public static final double PIVOT_POSITION_kI = 0.0;
+        public static final double PIVOT_POSITION_kD = 0.0;
+
         public static final double SHOOT_ON_THE_MOVE_DRIVER_INPUT_SCAILAR = 0.3;
         public static final double SHOOT_ON_THE_MOVE_DRIVER_INPUT_RATE_LIMIT = 1.0;
+
+
         
   }
   
