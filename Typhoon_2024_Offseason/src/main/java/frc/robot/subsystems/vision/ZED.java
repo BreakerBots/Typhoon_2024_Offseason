@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -29,6 +30,10 @@ public class ZED extends SubsystemBase {
 
   public ArrayList<TrackedObject> getTrackedObjects() {
     return trackedObjects;
+  }
+
+  public Pose3d getCameraPose() {
+    return null;
   }
 
   public static final record ObjectDimensions(double width, double height, double length) {}
