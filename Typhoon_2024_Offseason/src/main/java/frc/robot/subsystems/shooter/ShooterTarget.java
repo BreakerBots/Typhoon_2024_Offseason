@@ -79,7 +79,7 @@ public class ShooterTarget {
     }
 
     public Command runSmartSpool(Intake intake) {
-        return Commands.run(() -> {
+        return shooter.runShooter(() -> {
             double dist = drivetrain.getState().Pose.getTranslation().getDistance(getTargetPosition().toTranslation2d());
             ShooterState idealState = getStationaryShooterState(dist);
             Rotation2d pitchAngle = STOW_ANGLE;
@@ -92,8 +92,7 @@ public class ShooterTarget {
                     pitchAngle = idealState.pitchAngle();
                 }
             }
-            shooter.setState(new ShooterState(pitchAngle, flywheelVel));
-        }, shooter, hopper);
+            return new ShooterState(pitchAngle, flywheelVel);}, intake, hopper);
     }
 
     public static Command shoot(Supplier<ShooterState> stateSupplier, BooleanSupplier shootCondition, Shooter shooter, Hopper hopper) {

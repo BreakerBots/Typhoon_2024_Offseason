@@ -15,8 +15,5 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 public class Pathfinding {
     
 
-    public Command pathfindToPose() {
-        AutoBuilder.pathfindToPoseFlipped(null, null).andThen()
-        return null;
-    }
+
 }

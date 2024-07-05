@@ -5,6 +5,19 @@
       "/Robot/intake/rollerMotor": "Motor Controller"
     }
   },
+  "NetworkTables": {
+    "transitory": {
+      "ZED_detections": {
+        "double[]##v_/ZED_detections/y": {
+          "open": true
+        },
+        "double[]##v_/ZED_detections/z": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
   "NetworkTables Info": {
     "Server": {
       "Publishers": {

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
+import frc.robot.commands.HopperToIntakeHandoff;
 import frc.robot.commands.IntakeAndHold;
 import frc.robot.commands.IntakeAssist;
 import frc.robot.commands.IntakeForShooter;
@@ -35,17 +36,18 @@ import monologue.Monologue;
 
 public class RobotContainer implements Logged {
   public static final BreakerXboxController controller = new BreakerXboxController(0);
-  private final Intake intake = new Intake();
-  private final Shooter shooter = new Shooter();
-  private final Hopper hopper = new Hopper();
   private final Drivetrain drivetrain = new Drivetrain();
+  private final Intake intake = new Intake();
+  private final Shooter shooter = new Shooter(drivetrain::getChassisAccels);
+  private final Hopper hopper = new Hopper();
+  
   private final ZED zed = new ZED();
 
   private BreakerInputStream driverX, driverY, driverOmega;
   private SwerveRequest.FieldCentric teleopSwerveRequest;
   private final ShooterTarget SPEAKER = new ShooterTarget(drivetrain, shooter, hopper);
   public RobotContainer() {
-    shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
+    //shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
     boolean fileOnly = false;
     boolean lazyLogging = false;
@@ -82,19 +84,22 @@ public class RobotContainer implements Logged {
     BooleanSupplier errorState = () -> intake.hasNote() && hopper.hasNote();
     Trigger globalOverride = controller.getStartButton();
 
-    Command conditionalIntakeAssist = new ConditionalCommand(Commands.print("Intake Assist Overridden"), new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), globalOverride);
-
     // AMP CONTROLS
     controller.getLeftBumper()//intake amp
       .and(hasNoNote)
-      .onTrue(new IntakeAndHold(intake, true).deadlineWith(conditionalIntakeAssist));
+      .onTrue(new IntakeAndHold(intake, true)
+      .deadlineWith(new ConditionalCommand(
+        Commands.print("Intake Assist Overridden"), 
+        new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), 
+        globalOverride
+        )));
     controller.getLeftBumper()//handoff from hopper to intake
       .and(hopperOnlyHasNote)
-      .onTrue(null);
-    controller.getLeftBumper()//score amp
-      .and(intakeOnlyHasNote)
-      .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
-      .onTrue(null);
+      .onTrue(new HopperToIntakeHandoff(hopper, intake, true));
+    // controller.getLeftBumper()//score amp
+    //   .and(intakeOnlyHasNote)
+    //   .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
+    //   .onTrue(null);
     controller.getLeftBumper()//prep for amp score
       .and(intakeOnlyHasNote)
       .and(() -> intake.getState().getPivotState() != IntakePivotState.RETRACTED)
@@ -103,10 +108,14 @@ public class RobotContainer implements Logged {
     // SHOOTER CONTROLS
     controller.getRightBumper()//intake shooter
       .and(hasNoNote)
-      .onTrue(new IntakeForShooter(intake, hopper, shooter).deadlineWith(conditionalIntakeAssist));
+      .onTrue(new IntakeForShooter(intake, hopper, shooter)
+      .deadlineWith(new ConditionalCommand(
+        Commands.print("Intake Assist Overridden"), 
+        new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), 
+        globalOverride)));
     controller.getRightBumper()//handoff from intake to hopper
       .and(intakeOnlyHasNote)
-      .onTrue(null);
+      .onTrue(new IntakeForShooter(intake, hopper, shooter));
     controller.getRightBumper()
       .and(hopperOnlyHasNote)
       .onTrue(SPEAKER.shootWhileMoveing(driverX, driverY));

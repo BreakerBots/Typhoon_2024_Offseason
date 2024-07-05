@@ -7,6 +7,9 @@ package frc.robot.subsystems.shooter;
 import static java.lang.Math.round;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -39,6 +42,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -110,6 +114,13 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooter(Supplier<ShooterState> stateSupplier) {
     return Commands.run(() -> setState(stateSupplier.get()), this);
+  }
+
+  public Command runShooter(Supplier<ShooterState> stateSupplier, Subsystem... subsystems) {
+    ArrayList<Subsystem> reqs = new ArrayList<>(Arrays.asList(subsystems));
+    reqs.add(this);
+    Subsystem[] reqArr = reqs.toArray(new Subsystem[reqs.size()]);
+    return Commands.run(() -> setState(stateSupplier.get()), reqArr);
   }
 
   public static record ShooterState(Rotation2d pitchAngle, Measure<Velocity<Angle>> flywheelVel) {
