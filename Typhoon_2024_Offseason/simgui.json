@@ -8,10 +8,22 @@
   "NetworkTables": {
     "transitory": {
       "ZED_detections": {
+        "boolean[]##v_/ZED_detections/is_moving": {
+          "open": true
+        },
+        "double[]##v_/ZED_detections/x": {
+          "open": true
+        },
+        "double[]##v_/ZED_detections/x_vel": {
+          "open": true
+        },
         "double[]##v_/ZED_detections/y": {
           "open": true
         },
         "double[]##v_/ZED_detections/z": {
+          "open": true
+        },
+        "int[]##v_/ZED_detections/id": {
           "open": true
         },
         "open": true
