@@ -41,13 +41,14 @@ public class RobotContainer implements Logged {
   private final Shooter shooter = new Shooter(drivetrain::getChassisAccels);
   private final Hopper hopper = new Hopper();
   
-  private final ZED zed = new ZED();
+  private final ZED zed = new ZED(null, null);
 
   private BreakerInputStream driverX, driverY, driverOmega;
   private SwerveRequest.FieldCentric teleopSwerveRequest;
   private final ShooterTarget SPEAKER = new ShooterTarget(drivetrain, shooter, hopper);
+  private final ShooterTarget PASS = new ShooterTarget(drivetrain, shooter, hopper);
   public RobotContainer() {
-    //shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
+    shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
     boolean fileOnly = false;
     boolean lazyLogging = false;

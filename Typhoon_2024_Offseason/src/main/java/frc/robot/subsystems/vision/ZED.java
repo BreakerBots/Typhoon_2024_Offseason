@@ -40,21 +40,23 @@ public class ZED extends SubsystemBase {
     return null;
   }
 
-  public void test() {
-    Transform3d robotVelsInWorldFrame = new Transform3d();
-    Transform3d robotToCamera= new Transform3d();
-    Translation3d objVelsInCameraFrame = new Translation3d();
+  // public void test() {
+  //   Transform3d robotVelsInWorldFrame = new Transform3d();
+  //   Transform3d robotToCamera= new Transform3d();
+  //   Translation3d objVelsInCameraFrame = new Translation3d();
 
-    Translation3d cross = robotToCamera.rotateBy(robotVelsInWorldFrame.getRotation());
-    Translation3d v_worldToObj = robotVelsInWorldFrame.getTranslation().plus(cross).plus(objVelsInCameraFrame);
-  }
+  //   Translation3d cross = robotToCamera.rotateBy(robotVelsInWorldFrame.getRotation());
+  //   Translation3d v_worldToObj = robotVelsInWorldFrame.getTranslation().plus(cross).plus(objVelsInCameraFrame);
+  // }
 
 
 
   public static final record ObjectDimensions(double width, double height, double length) {}
 
   public static final class ObjectMotion {
-    public ObjectMotion(double timestamp, BreakerVector3 observedCameraRelitiveObjectMotion, Transform3d robotToCameraTransform, Pose3d globalRobotPose)
+    public ObjectMotion(double timestamp, BreakerVector3 observedCameraRelitiveObjectMotion, Transform3d robotToCameraTransform, Pose3d globalRobotPose) {
+
+    }
   }
 
   public static final class ObjectPosition {
@@ -82,7 +84,7 @@ public class ZED extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-   public static final record TrackedObject(
+  public static final record TrackedObject(
     int objectID, 
     String label,
     double timestamp,
@@ -92,5 +94,5 @@ public class ZED extends SubsystemBase {
     double confidance,
     boolean isVisible,
     boolean isMoveing
-    ) {} 
+  ) {} 
 }

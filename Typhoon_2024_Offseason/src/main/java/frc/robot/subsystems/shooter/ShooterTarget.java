@@ -68,10 +68,11 @@ public class ShooterTarget {
     private Function<Double, Double> angleFunction;
     private Function<Double, Double> speedFunction;
     public SmartSpoolConfig smartSpoolConfig;
-    public ShooterTarget(Drivetrain drivetrain, Shooter shooter, Hopper hopper) {
+    public ShooterTarget(Drivetrain drivetrain, Shooter shooter, Hopper hopper, Translation3d blueTargetPoint ) {
         this.drivetrain = drivetrain;
         this.shooter = shooter;
         this.hopper = hopper;
+        this.blueTargetPoint = blueTargetPoint;
         driveRequest.ForwardReference = ForwardReference.RedAlliance;
         driveRequest.DriveRequestType = DriveRequestType.Velocity;
         driveRequest.HeadingController.setPID(2.5, 0.0, 0.1);

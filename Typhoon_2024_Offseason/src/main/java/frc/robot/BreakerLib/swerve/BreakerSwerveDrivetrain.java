@@ -52,6 +52,8 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   /* Keep track if we've ever applied the operator perspective before or not */
   protected boolean hasAppliedOperatorPerspective = false;
 
+  protected SwerveModulePosition[] prevModulePositions;
+
   public BreakerSwerveDrivetrain(
     BreakerSwerveDrivetrainConstants driveTrainConstants, 
     SwerveModuleConstants... modules

@@ -4,8 +4,12 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -19,7 +23,9 @@ public class Hopper extends SubsystemBase {
   private WPI_TalonSRX hopperMotor;
   private HopperState state;
   public Hopper() {
-
+    //hopperMotor = new WPI_TalonSRX(HOPPER_ID);
+    hopperMotor.setNeutralMode(NeutralMode.Brake);
+    hopperMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
   }
 
   public static enum HopperState {
@@ -70,6 +76,8 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
+    if (RobotState.isDisabled()) {
+      setState(HopperState.NEUTRAL);
+    }
   }
 }
