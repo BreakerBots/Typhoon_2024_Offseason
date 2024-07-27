@@ -4,6 +4,8 @@
 
 package frc.robot.BreakerLib.physics;
 
+import static frc.robot.Constants.AmpBarConstants.RETRACTED_ANGLE_THRESHOLD;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -72,6 +74,10 @@ public class BreakerVector2 implements BreakerInterpolable<BreakerVector2> {
 
     public static BreakerVector2 fromColumnMatrix(Matrix<N2, N1> columnMatrix) {
         return new BreakerVector2(columnMatrix.get(0, 0), columnMatrix.get(1, 0));
+    }
+
+    public static BreakerVector2 fromChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        return new BreakerVector2(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
     }
 
     

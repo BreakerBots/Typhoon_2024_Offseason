@@ -9,14 +9,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
+import frc.robot.subsystems.Intake2.IntakeRollerState;
 import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
+import frc.robot.subsystems.vision.NoteVision;
+import frc.robot.subsystems.vision.ZED;
+import frc.robot.subsystems.vision.ZED.TrackedObject;
 
+import static frc.robot.Constants.IntakeConstants.MAX_SMART_ROLLER_ENABLE_NOTE_DISTANCE;
 import static frc.robot.Constants.IntakeConstants2.*;
+import static java.lang.Math.round;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.Follower;
@@ -90,6 +99,10 @@ public class Intake2 extends SubsystemBase {
     }
   }
 
+  private void applyRollerState(IntakeRollerState rollerState) {
+    rollerMotor.set(rollerState.getMotorDutyCycle());
+  }
+
   public static enum IntakeRollerState {
     INTAKEING(-0.8),
     EXTAKEING(1.0),
@@ -107,5 +120,30 @@ public class Intake2 extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  /** Dynaicly enables and disables intake rollers depeding on note visablity */
+  public Command smartRollerControlCommand(ZED zed, NoteVision noteVision, IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
+    return new FunctionalCommand(()->{}, 
+      () -> {
+        boolean isApplicableToCurrentState = RobotState.isTeleop();
+        if (isApplicableToCurrentState) {
+          boolean shouldRun = noteVision.hasTarget();
+          if (!shouldRun) {
+            for (TrackedObject obj : zed.getTrackedObjects()) {
+              double dist = obj.position().getRobotToObject(true).getNorm();
+              if (dist <= MAX_SMART_ROLLER_ENABLE_NOTE_DISTANCE.in(Units.Meters)) {
+                shouldRun = true;
+                break;
+              }
+            }
+          }
+          if (shouldRun && setpoint.goalState.rollerState != IntakeRollerState.INTAKEING) {
+            setState(IntakeSetpoint.EXTENDED_INTAKEING);
+          } else if (setpoint.goalState.rollerState != IntakeRollerState.NEUTRAL) {
+            setState(IntakeSetpoint.EXTENDED_NEUTRAL);
+          }
+        }
+      }, (Boolean cancled) -> setState(endSetpoint), endCondition, this);
   }
 }

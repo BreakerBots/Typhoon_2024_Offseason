@@ -30,6 +30,10 @@ public class ZED extends SubsystemBase {
 
   }
 
+  public Transform3d getRobotToCameraTransform() {
+    return null;
+  }
+
   private ArrayList<TrackedObject> trackedObjects;
 
   public ArrayList<TrackedObject> getTrackedObjects() {

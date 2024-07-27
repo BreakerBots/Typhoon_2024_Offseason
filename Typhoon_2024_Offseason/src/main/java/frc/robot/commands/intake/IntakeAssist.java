@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.intake;
 
 import java.util.Optional;
 
@@ -26,10 +26,11 @@ import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Intake.IntakeRollerState;
-import frc.robot.subsystems.Intake.IntakeState;
+import frc.robot.subsystems.Intake2;
+import frc.robot.subsystems.Intake2.IntakeRollerState;
+import frc.robot.subsystems.vision.NoteVision;
 import frc.robot.subsystems.vision.ZED;
+import frc.robot.subsystems.vision.NoteVision.TrackedNote2D;
 import frc.robot.subsystems.vision.ZED.TrackedObject;
 
 public class IntakeAssist extends Command {
@@ -46,9 +47,10 @@ public class IntakeAssist extends Command {
   private static final double MIN_ACTIVE_TRANSLATIONAL_INPUT = 0.05;
 
   private Drivetrain drive;
-  private Intake intake;
+  private Intake2 intake;
   private Hopper hopper;
   private ZED zed;
+  private NoteVision nv;
   private BreakerInputStream xStream;
   private BreakerInputStream yStream;
   private BreakerInputStream xStreamFiltered;
@@ -58,7 +60,7 @@ public class IntakeAssist extends Command {
   private PIDController omegaPID;
   private SwerveRequest.FieldCentric driveRequest;
   
-  public IntakeAssist(Drivetrain drive, Intake intake, Hopper hopper, ZED zed, BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
+  public IntakeAssist(Drivetrain drive, Intake2 intake, Hopper hopper, ZED zed, NoteVision nv, BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
     this.drive = drive;
     this.intake = intake;
     this.hopper = hopper;
@@ -68,6 +70,7 @@ public class IntakeAssist extends Command {
     this.omegaStream = omegaStream;
     linearPID = new PIDController(0.0, 0.0, 0.0);
     omegaPID = new PIDController(0.0, 0.0, 0.0);
+    omegaPID.enableContinuousInput(-0.5, 0.5);
     int taps = (int)(INPUT_MOVEING_AVERAGE_TIME * 50);
     xStreamFiltered = xStream.filter(LinearFilter.movingAverage(taps));
     yStreamFiltered = yStream.filter(LinearFilter.movingAverage(taps));
@@ -86,44 +89,49 @@ public class IntakeAssist extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Optional<Pair<TrackedObject, Double>> bestNote = Optional.empty();
-    SwerveDriveState state = drive.getState();
-    BreakerVector2 filteredDriverReqVec = new BreakerVector2(xStreamFiltered.get(), yStreamFiltered.get());
-    for (TrackedObject obj : zed.getTrackedObjects()) {
-      if (obj.label() == "note" && obj.isVisible())  {
-       double distErr = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
-       double errorBound = 0.5;
-       double rawVecAngErr = filteredDriverReqVec.getVectorRotation().getRotations() - obj.position().getRobotToObject(true).toTranslation2d().getAngle().getRotations();
-       double angErr = Math.abs(MathUtil.inputModulus(rawVecAngErr, -errorBound, errorBound));
-       double errScore = (angErr * ANGLE_ERROR_SCAILAR) * (distErr * DIST_ERROR_SCAILAR);
-       if (errScore <= MAX_ERROR_SCORE && angErr <= MAX_ANGLE_ERROR && distErr <= MAX_DIST_ERROR) {
-          if ((bestNote.isPresent() && bestNote.get().getSecond() > errScore) || bestNote.isEmpty()) {
-            bestNote = Optional.of(new Pair<TrackedObject, Double>(obj, errScore));
-          }
-       }
-      }
-    }
     double xOut = xStream.get();
     double yOut = yStream.get();
     double omegaOut = omegaStream.get();
-    if (bestNote.isPresent() && Math.abs(omegaOut) < TOTAL_DISENGAGE_OMEGA_THRESH && Math.hypot(xOut, yOut) >= MIN_ACTIVE_TRANSLATIONAL_INPUT ) {
-      TrackedObject obj = bestNote.get().getFirst();
-      double dist = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
-      var reqVec = new BreakerVector2(xOut, yOut).rotateBy(drive.getOperatorForwardDirection());
-      double pidOut = linearPID.calculate(dist, 0.0);
-      Rotation2d angToNote = BreakerMath.getPointAngleRelativeToOtherPoint(state.Pose.getTranslation(), obj.position().getGlobal(true).toTranslation2d());
-      var pidVec = new BreakerVector2(angToNote, pidOut);
-      var linearCorectionVec = reqVec.getUnitVector().minus(pidVec.getUnitVector()).times(pidOut);
-      var linOutputVec = reqVec.plus(linearCorectionVec).clampMagnitude(0.0, Constants.DriveConstants.MAXIMUM_TRANSLATIONAL_VELOCITY.in(Units.MetersPerSecond));
-      xOut = linOutputVec.getX();
-      yOut = linOutputVec.getY();
-      if (omegaOut < OMEGA_ASSIST_DISEGAGE_THRESH) {
-        omegaOut = omegaPID.calculate(angToNote.getRotations(), state.Pose.getRotation().getRotations());
+    if (!nv.hasTarget()) {
+      Optional<Pair<TrackedObject, Double>> bestNote = Optional.empty();
+      SwerveDriveState state = drive.getState();
+      BreakerVector2 filteredDriverReqVec = new BreakerVector2(xStreamFiltered.get(), yStreamFiltered.get());
+      for (TrackedObject obj : zed.getTrackedObjects()) {
+        if (obj.label() == "note" && obj.isVisible())  {
+        double distErr = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
+        double errorBound = 0.5;
+        double rawVecAngErr = filteredDriverReqVec.getVectorRotation().getRotations() - obj.position().getRobotToObject(true).toTranslation2d().getAngle().getRotations();
+        double angErr = Math.abs(MathUtil.inputModulus(rawVecAngErr, -errorBound, errorBound));
+        double errScore = (angErr * ANGLE_ERROR_SCAILAR) * (distErr * DIST_ERROR_SCAILAR);
+        if (errScore <= MAX_ERROR_SCORE && angErr <= MAX_ANGLE_ERROR && distErr <= MAX_DIST_ERROR) {
+            if ((bestNote.isPresent() && bestNote.get().getSecond() > errScore) || bestNote.isEmpty()) {
+              bestNote = Optional.of(new Pair<TrackedObject, Double>(obj, errScore));
+            }
+        }
+        }
       }
-      driveRequest.withVelocityX(xOut).withVelocityY(yOut).withRotationalRate(omegaOut);
-      drive.setControl(driveRequest);
+      
+      if (bestNote.isPresent() && Math.abs(omegaOut) < TOTAL_DISENGAGE_OMEGA_THRESH && Math.hypot(xOut, yOut) >= MIN_ACTIVE_TRANSLATIONAL_INPUT ) {
+        TrackedObject obj = bestNote.get().getFirst();
+        double dist = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
+        var reqVec = new BreakerVector2(xOut, yOut).rotateBy(drive.getOperatorForwardDirection());
+        double pidOut = linearPID.calculate(dist, 0.0);
+        Rotation2d angToNote = BreakerMath.getPointAngleRelativeToOtherPoint(state.Pose.getTranslation(), obj.position().getGlobal(true).toTranslation2d());
+        var pidVec = new BreakerVector2(angToNote, pidOut);
+        var linearCorectionVec = reqVec.getUnitVector().minus(pidVec.getUnitVector()).times(pidOut);
+        var linOutputVec = reqVec.plus(linearCorectionVec).clampMagnitude(0.0, Constants.DriveConstants.MAXIMUM_TRANSLATIONAL_VELOCITY.in(Units.MetersPerSecond));
+        xOut = linOutputVec.getX();
+        yOut = linOutputVec.getY();
+        if (omegaOut < OMEGA_ASSIST_DISEGAGE_THRESH) {
+          omegaOut = omegaPID.calculate(angToNote.getRotations(), state.Pose.getRotation().getRotations());
+        }
+      }
+    } else {
+      TrackedNote2D tgt = nv.getBestTarget();
+      omegaOut = omegaPID.calculate(nv)
     }
-    
+    driveRequest.withVelocityX(xOut).withVelocityY(yOut).withRotationalRate(omegaOut);
+    drive.setControl(driveRequest);
   }
 
   // Called once the command ends or is interrupted.
@@ -133,6 +141,6 @@ public class IntakeAssist extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return intake.getState().getRollerState() != IntakeRollerState.INTAKEING || intake.hasNote() || hopper.hasNote();
+    return intake.getSetpoint().goalState().rollerState() != IntakeRollerState.INTAKEING || intake.hasNote() || hopper.hasNote();
   }
 }

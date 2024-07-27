@@ -41,7 +41,9 @@ public class LED extends SubsystemBase {
     DISABLED(new RgbFadeAnimation(1, 0.5, LED_COUNT)),
     ENABLED(new RainbowAnimation(1, 1, LED_COUNT)),
     ENABLED_WITH_NOTE_IN_HOPPER(new StrobeAnimation(ColorRefrence.ORANGE.red, ColorRefrence.ORANGE.green, ColorRefrence.ORANGE.blue, 0, 0.5, LED_COUNT, 0)),
-    ENABLED_WITH_NOTE_IN_INTAKE(new StrobeAnimation(ColorRefrence.YELLOW.red, ColorRefrence.YELLOW.green, ColorRefrence.YELLOW.blue, 0, 0.5, LED_COUNT, 0));
+    ENABLED_WITH_NOTE_IN_INTAKE(new StrobeAnimation(ColorRefrence.YELLOW.red, ColorRefrence.YELLOW.green, ColorRefrence.YELLOW.blue, 0, 0.5, LED_COUNT, 0))
+    
+    ;
     private AnimationType(Animation anim) {
 
     }

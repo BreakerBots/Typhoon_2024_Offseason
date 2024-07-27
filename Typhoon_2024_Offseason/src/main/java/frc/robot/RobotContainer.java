@@ -19,10 +19,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
-import frc.robot.commands.HopperToIntakeHandoff;
-import frc.robot.commands.IntakeAndHold;
-import frc.robot.commands.IntakeAssist;
-import frc.robot.commands.IntakeForShooter;
+import frc.robot.commands.amp.ScoreAmp;
+import frc.robot.commands.intake.HopperToIntakeHandoff;
+import frc.robot.commands.intake.IntakeAndHold;
+import frc.robot.commands.intake.IntakeAssist;
+import frc.robot.commands.intake.IntakeForShooter;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
@@ -97,10 +98,10 @@ public class RobotContainer implements Logged {
     controller.getLeftBumper()//handoff from hopper to intake
       .and(hopperOnlyHasNote)
       .onTrue(new HopperToIntakeHandoff(hopper, intake, true));
-    // controller.getLeftBumper()//score amp
-    //   .and(intakeOnlyHasNote)
-    //   .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
-    //   .onTrue(null);
+    controller.getLeftBumper()//score amp
+      .and(intakeOnlyHasNote)
+      .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
+      .onTrue(new ScoreAmp(null, null));
     controller.getLeftBumper()//prep for amp score
       .and(intakeOnlyHasNote)
       .and(() -> intake.getState().getPivotState() != IntakePivotState.RETRACTED)
