@@ -40,10 +40,8 @@ import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
 import frc.robot.BreakerLib.util.factory.BreakerCANCoderFactory;
 import frc.robot.BreakerLib.driverstation.gamepad.BreakerGamepadTimedRumbleCommand;
 import frc.robot.Constants.IntakeConstants;
-import monologue.Logged;
-import monologue.Annotations.Log;
 
-public class Intake extends SubsystemBase implements Logged {
+public class Intake extends SubsystemBase {
   private TalonFX rollerMotor;  
   private TalonFX pivotLeft, pivotRight;
   private IntakeState targetState;
@@ -241,10 +239,10 @@ public class Intake extends SubsystemBase implements Logged {
 
     piviotDutyCycleControlRequest.withOutput(targetState.getPivotState().getMotorDutyCycle());
     
-    log("ExtendLimitTriggered", isExtendLimitTriggered());
-    log("RetractLimitTriggered", isRetractLimitTriggered());
-    log("HasNote", hasNote());
-    log("State", targetState.toString());
+    // log("ExtendLimitTriggered", isExtendLimitTriggered());
+    // log("RetractLimitTriggered", isRetractLimitTriggered());
+    // log("HasNote", hasNote());
+    // log("State", targetState.toString());
     pivotLeft.setControl(piviotDutyCycleControlRequest);
     pivotRight.setControl(pivotFollowerRequest);
     rollerMotor.set(targetState.getRollerState().getMotorDutyCycle());

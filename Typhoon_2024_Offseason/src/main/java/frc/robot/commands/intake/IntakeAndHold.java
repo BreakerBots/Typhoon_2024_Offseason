@@ -25,10 +25,7 @@ public class IntakeAndHold extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       intake.setStateCommand(IntakeSetpoint.EXTENDED_NEUTRAL, true),
-      intake.setStateCommand(IntakeSetpoint.EXTENDED_INTAKEING, false),
-      intake.smartRollerControlCommand(zed, nv, retractIntakeOnSuccess ? IntakeSetpoint.RETRACTED_NEUTRAL : IntakeSetpoint.EXTENDED_NEUTRAL, intake::hasNote),
-      new WaitUntilCommand(intake::hasNote),
-      new ConditionalCommand(intake.setStateCommand(IntakeSetpoint.RETRACTED_NEUTRAL, false), intake.setStateCommand(IntakeSetpoint.EXTENDED_NEUTRAL, false),() -> retractIntakeOnSuccess)
+      intake.smartRollerControlCommand(zed, nv, retractIntakeOnSuccess ? IntakeSetpoint.RETRACTED_NEUTRAL : IntakeSetpoint.EXTENDED_NEUTRAL, intake::hasNote)
     );
   }
 }

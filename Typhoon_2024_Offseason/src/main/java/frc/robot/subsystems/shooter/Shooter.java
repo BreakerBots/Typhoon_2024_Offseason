@@ -25,6 +25,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -52,6 +53,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -60,6 +63,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.GeneralConstants;
 import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.BreakerLib.physics.ChassisAccels;
+import frc.robot.BreakerLib.util.commands.TimedWaitUntilCommand;
 import frc.robot.BreakerLib.util.factory.BreakerCANCoderFactory;
 import frc.robot.BreakerLib.util.math.BreakerUnits;
 
@@ -211,6 +215,22 @@ public class Shooter extends SubsystemBase {
     reqs.add(this);
     Subsystem[] reqArr = reqs.toArray(new Subsystem[reqs.size()]);
     return Commands.run(() -> setState(stateSupplier.get()), reqArr);
+  }
+
+  public Command homePivot() {
+    BooleanSupplier atZeroVel = () -> MathUtil.isNear(0.0, pivotVelSup.get(), HOME_TRIGGER_VEL_TOL.in(Units.RotationsPerSecond));
+    return Commands.sequence(
+      setStateCommand(getCurrentState().withFlywheelVel(Units.RevolutionsPerSecond.of(0.0)), true).withTimeout(1.5),
+      new TimedWaitUntilCommand(() -> {return atZeroVel.getAsBoolean() && MathUtil.isNear(pivot.getMotorVoltage().getValueAsDouble(), HOME_SPIKE_VOLTAGE, 1e-1);}, HOME_SPIKE_TIME).deadlineWith(
+        Commands.repeatingSequence(
+          Commands.runOnce(() -> pivot.setVoltage(HOME_VOLTAGE), this),
+          new TimedWaitUntilCommand(atZeroVel, HOME_TRIGGER_TIME),
+          Commands.runOnce(() -> pivot.setVoltage(HOME_SPIKE_VOLTAGE), this)
+        )
+      ),
+      Commands.runOnce(() -> pivot.setVoltage(0.0), this),
+      Commands.runOnce(() -> pivotEncoder.setPosition(HOME_POS.getRotations()), this)
+    ).withTimeout(10.0).andThen(setStateCommand(getCurrentState().withFlywheelVel(Units.RevolutionsPerSecond.of(0.0)), true));
   }
 
   public static record ShooterState(Rotation2d pitchAngle, Measure<Velocity<Angle>> flywheelVel) {

@@ -127,8 +127,8 @@ public class IntakeAssist extends Command {
         }
       }
     } else {
-      TrackedNote2D tgt = nv.getBestTarget();
-      omegaOut = omegaPID.calculate(nv)
+      TrackedNote2D tgt = nv.getBestTarget().get();
+      omegaOut = omegaPID.calculate(tgt.yaw().getRotations(), 0.0);
     }
     driveRequest.withVelocityX(xOut).withVelocityY(yOut).withRotationalRate(omegaOut);
     drive.setControl(driveRequest);

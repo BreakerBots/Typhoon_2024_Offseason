@@ -4,7 +4,17 @@
 
 package frc.robot.BreakerLib.util.loging;
 
+import dev.doglog.DogLog;
+
 /** Add your docs here. */
-public class LogMetadataManager {
+public class BreakerLog extends DogLog {
     
+    public static void logMetadata(Metadata metadata) {
+
+    }
+
+
+
+    public record Metadata() {
+    }
 }

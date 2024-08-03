@@ -10,6 +10,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -22,6 +23,7 @@ import frc.robot.subsystems.vision.ZED;
 import frc.robot.subsystems.vision.ZED.TrackedObject;
 
 import static frc.robot.Constants.IntakeConstants.MAX_SMART_ROLLER_ENABLE_NOTE_DISTANCE;
+import static frc.robot.Constants.IntakeConstants.SMART_ROLLER_MAX_WAIT_FOR_DET;
 import static frc.robot.Constants.IntakeConstants2.*;
 import static java.lang.Math.round;
 
@@ -124,7 +126,11 @@ public class Intake2 extends SubsystemBase {
 
   /** Dynaicly enables and disables intake rollers depeding on note visablity */
   public Command smartRollerControlCommand(ZED zed, NoteVision noteVision, IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
-    return new FunctionalCommand(()->{}, 
+    Timer timer = new Timer();
+    return new FunctionalCommand(()->{
+      timer.stop();
+      timer.reset();
+    }, 
       () -> {
         boolean isApplicableToCurrentState = RobotState.isTeleop();
         if (isApplicableToCurrentState) {
@@ -138,11 +144,22 @@ public class Intake2 extends SubsystemBase {
               }
             }
           }
-          if (shouldRun && setpoint.goalState.rollerState != IntakeRollerState.INTAKEING) {
+          if (!shouldRun) {
+            timer.start();
+          } else {
+            timer.stop();
+            timer.reset();
+          }
+
+          if ((shouldRun || !timer.hasElapsed(SMART_ROLLER_MAX_WAIT_FOR_DET)) && setpoint.goalState.rollerState != IntakeRollerState.INTAKEING) {
             setState(IntakeSetpoint.EXTENDED_INTAKEING);
           } else if (setpoint.goalState.rollerState != IntakeRollerState.NEUTRAL) {
             setState(IntakeSetpoint.EXTENDED_NEUTRAL);
           }
+        } else {
+          timer.stop();
+          timer.reset();
+          setState(IntakeSetpoint.EXTENDED_INTAKEING);
         }
       }, (Boolean cancled) -> setState(endSetpoint), endCondition, this);
   }

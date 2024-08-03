@@ -13,8 +13,11 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 
+import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LED extends SubsystemBase {
@@ -32,20 +35,30 @@ public class LED extends SubsystemBase {
     
   }
 
-  private static class ColorRefrence {
+  public void setAnimation(AnimationType type) {
+
+  }
+
+  public Command setAnimationCommand(AnimationType type) {
+    return Commands.runOnce(() -> setAnimation(type), this);
+  }
+
+  public static class ColorRefrence {
     public static final Color8Bit ORANGE = new Color8Bit(Color.kOrange);
     public static final Color8Bit YELLOW = new Color8Bit(Color.kYellow);
+    public static final Color8Bit RED = new Color8Bit(Color.kRed);
   }
 
   public static enum AnimationType {
     DISABLED(new RgbFadeAnimation(1, 0.5, LED_COUNT)),
     ENABLED(new RainbowAnimation(1, 1, LED_COUNT)),
+    ERROR(new StrobeAnimation(ColorRefrence.RED.red, ColorRefrence.RED.green, ColorRefrence.RED.blue, 0, 0.5, LED_COUNT, 0)),
     ENABLED_WITH_NOTE_IN_HOPPER(new StrobeAnimation(ColorRefrence.ORANGE.red, ColorRefrence.ORANGE.green, ColorRefrence.ORANGE.blue, 0, 0.5, LED_COUNT, 0)),
     ENABLED_WITH_NOTE_IN_INTAKE(new StrobeAnimation(ColorRefrence.YELLOW.red, ColorRefrence.YELLOW.green, ColorRefrence.YELLOW.blue, 0, 0.5, LED_COUNT, 0))
     
     ;
     private AnimationType(Animation anim) {
-
+      AddressableLED.
     }
   }
 

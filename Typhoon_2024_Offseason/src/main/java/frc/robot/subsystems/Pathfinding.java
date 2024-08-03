@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.pathfinding.LocalADStar;
 
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,7 +32,8 @@ public class Pathfinding {
     }
 
     public Command obsticleAvoidanceScanRotationOverride(double endOverrideDistanceFromGoal) {
-        Commands.runOnce(() -> PPHolonomicDriveController.setRotationTargetOverride(scanRotOverrideSup)).andThen(new WaitCommand())
+        Commands.runOnce(() -> PPHolonomicDriveController.setRotationTargetOverride(scanRotOverrideSup)).andThen(new WaitCommand());
+        
     }
 
 }

@@ -50,6 +50,12 @@ public class Constants {
 
   }
 
+  public static class BatteryTrackerConstants {
+        public static final String LIMELIGHT_NAME = "BatteryLL";
+        public static final String BATTERY_NAME_FILE_PATH = "/home/lvuser/prev_battery.txt";
+        public static final String DEFAULT_BATTERY_NAME = "UNKNOWN";
+  }
+
   public static class ApriltagVisionConstants {
 
         public static final String FRONT_LEFT_CAMERA_NAME = "";
@@ -112,6 +118,7 @@ public class Constants {
         public static final Rotation2d STOW_ANGLE =  Rotation2d.fromRotations(0.016);
         public static final Rotation2d MIN_ANGLE =  Rotation2d.fromRotations(0.01);
         public static final Rotation2d MAX_ANGLE =  Rotation2d.fromRotations(0.21);
+
         public static final Rotation2d INTAKE_HANDOFF_ANGLE = Rotation2d.fromRotations(0.016);
         public static final ShooterState INTAKE_HANDOFF_STATE = new ShooterState(INTAKE_HANDOFF_ANGLE, Units.RadiansPerSecond.of(0.0));
 
@@ -143,6 +150,15 @@ public class Constants {
         public static final Measure<Velocity<Angle>> PIVOT_VEL_TOLERENCE = Units.DegreesPerSecond.of(180.0);
         public static final Measure<Velocity<Angle>> FLYWHEEL_VEL_TOLERENCE = Units.RotationsPerSecond.of(4.0);
         public static final Measure<Velocity<Velocity<Angle>>> FLYWHEEL_ACCEL_TOLERENCE = BreakerUnits.RotationsPerSecondPerSecond.of(5.0);
+
+        //Homeing
+        public static final Rotation2d HOME_POS = Rotation2d.fromRotations(0.08);
+        public static final double HOME_VOLTAGE = -3.0;
+        public static final Measure<Velocity<Angle>> HOME_TRIGGER_VEL_TOL = Units.RotationsPerSecond.of(1e-5);
+        public static final double HOME_TRIGGER_TIME = 0.3;
+        public static final double HOME_SPIKE_VOLTAGE = -8.0;
+        public static final double HOME_SPIKE_TIME = 0.6;
+        public static final double HOME_CURRENT_LIMIT = 15.0;
         
   }
   
@@ -162,6 +178,7 @@ public class Constants {
       public static final double PIVOT_AGAINST_AMP_ANGLE_THRESHOLD = 0.30; // temporary
 
       public static final Measure<Distance> MAX_SMART_ROLLER_ENABLE_NOTE_DISTANCE = Units.Meters.of(2.5);
+      public static final double SMART_ROLLER_MAX_WAIT_FOR_DET = 1.0;
     }
 
     public static class IntakeConstants2 {

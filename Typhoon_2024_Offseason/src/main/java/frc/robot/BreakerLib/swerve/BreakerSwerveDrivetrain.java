@@ -35,12 +35,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.physics.ChassisAccels;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.subsystems.Hopper;
-import monologue.Logged;
-import monologue.Annotations.Log;
 
-public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsystem, Logged {
+public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
 
   /** Creates a new BreakerSwerveDrivetrain. */
   protected Notifier simNotifier = null;
@@ -85,13 +84,13 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   }
   
   private void telemetryCallbackWrapperFunction(SwerveDriveState state) {
-    this.log("Pose", state.Pose);
-    this.log("Speeds", state.speeds);
-    this.log("ModuleStates", state.ModuleStates);
-    this.log("TargetModuleStates", state.ModuleTargets);
-    this.log("SuccessfulDAQs", state.SuccessfulDaqs);
-    this.log("FailedDAQs", state.FailedDaqs);
-    this.log("OdometryPeriod", state.OdometryPeriod);
+    BreakerLog.log("SwerveDrivetrain/Pose", state.Pose);
+    BreakerLog.log("SwerveDrivetrain/Speeds", state.speeds);
+    BreakerLog.log("SwerveDrivetrain/ModuleStates", state.ModuleStates);
+    BreakerLog.log("SwerveDrivetrain/TargetModuleStates", state.ModuleTargets);
+    BreakerLog.log("SwerveDrivetrain/SuccessfulDAQs", state.SuccessfulDaqs);
+    BreakerLog.log("SwerveDrivetrain/FailedDAQs", state.FailedDaqs);
+    BreakerLog.log("SwerveDrivetrain/OdometryPeriod", state.OdometryPeriod);
     if (userTelemetryCallback != null) {
       userTelemetryCallback.accept(state);
     }
