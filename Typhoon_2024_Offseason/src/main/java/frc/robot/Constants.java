@@ -152,7 +152,7 @@ public class Constants {
         public static final Measure<Velocity<Velocity<Angle>>> FLYWHEEL_ACCEL_TOLERENCE = BreakerUnits.RotationsPerSecondPerSecond.of(5.0);
 
         //Homeing
-        public static final Rotation2d HOME_POS = Rotation2d.fromRotations(0.08);
+        public static final Rotation2d HOME_POS = Rotation2d.fromRotations(0.017334);
         public static final double HOME_VOLTAGE = -3.0;
         public static final Measure<Velocity<Angle>> HOME_TRIGGER_VEL_TOL = Units.RotationsPerSecond.of(1e-5);
         public static final double HOME_TRIGGER_TIME = 0.3;

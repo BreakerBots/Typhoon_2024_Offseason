@@ -20,7 +20,10 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
@@ -91,6 +94,7 @@ public class Shooter extends SubsystemBase {
   private Supplier<Double> flywheelAccelSup;
   private Supplier<Double> pivotPosSup;
   private Supplier<Double> pivotVelSup;
+  private CurrentLimitsConfigs defaultPivotCurrentLimits, pivotHomeRoutineCurrentLimits;
   public Shooter(Supplier<ChassisAccels> robotAccelSupplier) {
     this.robotAccelSupplier = robotAccelSupplier;
     pivot = new TalonFX(SHOOTER_PIVOT_ID, GeneralConstants.DRIVE_CANIVORE_NAME);
@@ -153,9 +157,16 @@ public class Shooter extends SubsystemBase {
     config.MotionMagic.MotionMagicCruiseVelocity = 4.0;
     config.MotionMagic.MotionMagicAcceleration = 0.6;
 
-    config.CurrentLimits.SupplyCurrentLimit = 80;
-    config.CurrentLimits.SupplyTimeThreshold = 1.5;
-    config.CurrentLimits.SupplyCurrentLimitEnable = false;
+    defaultPivotCurrentLimits = new CurrentLimitsConfigs();
+    defaultPivotCurrentLimits.SupplyCurrentLimit = 80;
+    defaultPivotCurrentLimits.SupplyTimeThreshold = 1.5;
+    
+    pivotHomeRoutineCurrentLimits = new CurrentLimitsConfigs();
+    pivotHomeRoutineCurrentLimits.StatorCurrentLimit = HOME_CURRENT_LIMIT;
+    pivotHomeRoutineCurrentLimits.StatorCurrentLimitEnable = true;
+
+    config.CurrentLimits = defaultPivotCurrentLimits;
+
     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = MAX_ANGLE.getRotations();
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = MIN_ANGLE.getRotations();
@@ -220,6 +231,7 @@ public class Shooter extends SubsystemBase {
   public Command homePivot() {
     BooleanSupplier atZeroVel = () -> MathUtil.isNear(0.0, pivotVelSup.get(), HOME_TRIGGER_VEL_TOL.in(Units.RotationsPerSecond));
     return Commands.sequence(
+      Commands.runOnce(() -> configForHomeRoutine(true), this),
       setStateCommand(getCurrentState().withFlywheelVel(Units.RevolutionsPerSecond.of(0.0)), true).withTimeout(1.5),
       new TimedWaitUntilCommand(() -> {return atZeroVel.getAsBoolean() && MathUtil.isNear(pivot.getMotorVoltage().getValueAsDouble(), HOME_SPIKE_VOLTAGE, 1e-1);}, HOME_SPIKE_TIME).deadlineWith(
         Commands.repeatingSequence(
@@ -229,8 +241,18 @@ public class Shooter extends SubsystemBase {
         )
       ),
       Commands.runOnce(() -> pivot.setVoltage(0.0), this),
-      Commands.runOnce(() -> pivotEncoder.setPosition(HOME_POS.getRotations()), this)
+      Commands.runOnce(() -> pivotEncoder.setPosition(HOME_POS.getRotations()), this),
+      Commands.runOnce(() -> configForHomeRoutine(false), this)
     ).withTimeout(10.0).andThen(setStateCommand(getCurrentState().withFlywheelVel(Units.RevolutionsPerSecond.of(0.0)), true));
+  }
+
+  private void configForHomeRoutine(boolean enterHomeRoutine) {
+    TalonFXConfigurator configurator = pivot.getConfigurator();
+    configurator.apply(enterHomeRoutine ? pivotHomeRoutineCurrentLimits : defaultPivotCurrentLimits);
+    SoftwareLimitSwitchConfigs softLimits = new SoftwareLimitSwitchConfigs();
+    configurator.refresh(softLimits);
+    softLimits.ForwardSoftLimitEnable = !enterHomeRoutine;
+    softLimits.ForwardSoftLimitEnable = !enterHomeRoutine;
   }
 
   public static record ShooterState(Rotation2d pitchAngle, Measure<Velocity<Angle>> flywheelVel) {

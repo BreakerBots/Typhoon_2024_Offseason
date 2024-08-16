@@ -10,14 +10,18 @@ import java.util.function.BooleanSupplier;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
 import frc.robot.commands.amp.ScoreAmp;
 import frc.robot.commands.intake.HopperToIntakeHandoff;
@@ -32,10 +36,8 @@ import frc.robot.subsystems.Intake.IntakeState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterTarget;
 import frc.robot.subsystems.vision.ZED;
-import monologue.Logged;
-import monologue.Monologue;
 
-public class RobotContainer implements Logged {
+public class RobotContainer {
   public static final BreakerXboxController controller = new BreakerXboxController(0);
   private final Drivetrain drivetrain = new Drivetrain();
   private final Intake intake = new Intake();
@@ -51,9 +53,10 @@ public class RobotContainer implements Logged {
   public RobotContainer() {
     shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
-    boolean fileOnly = false;
-    boolean lazyLogging = false;
-    Monologue.setupMonologue(this, "Robot", fileOnly, lazyLogging);
+    BreakerLog.setOptions(new DogLogOptions(true, false, true, true, 2000)); 
+    BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
+    BreakerLog.setEnabled(true);
+     
   }
 
   private void configureControls() {

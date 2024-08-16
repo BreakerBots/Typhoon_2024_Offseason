@@ -7,6 +7,7 @@ package frc.robot.subsystems.vision;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -44,16 +45,6 @@ public class ZED extends SubsystemBase {
     return null;
   }
 
-  // public void test() {
-  //   Transform3d robotVelsInWorldFrame = new Transform3d();
-  //   Transform3d robotToCamera= new Transform3d();
-  //   Translation3d objVelsInCameraFrame = new Translation3d();
-
-  //   Translation3d cross = robotToCamera.rotateBy(robotVelsInWorldFrame.getRotation());
-  //   Translation3d v_worldToObj = robotVelsInWorldFrame.getTranslation().plus(cross).plus(objVelsInCameraFrame);
-  // }
-
-
 
   public static final record ObjectDimensions(double width, double height, double length) {}
 
@@ -64,7 +55,7 @@ public class ZED extends SubsystemBase {
   }
 
   public static final class ObjectPosition {
-    public ObjectPosition(double timestamp, BreakerVector3 cameraRelivitveObjectVelocity, Translation3d cameraToObjectTranslation, Transform3d robotToCameraTransform, Pose2d globalRobotPose) {
+    public ObjectPosition(double timestamp, ObjectMotion motion, Translation3d cameraToObjectTranslation, Transform3d robotToCameraTransform, Pose2d globalRobotPose) {
 
       
     }
@@ -97,6 +88,7 @@ public class ZED extends SubsystemBase {
     ObjectDimensions cameraRelitiveDimensions,
     double confidance,
     boolean isVisible,
-    boolean isMoveing
+    boolean isMoveing,
+    Optional<TrackedObject> prevInstance
   ) {} 
 }

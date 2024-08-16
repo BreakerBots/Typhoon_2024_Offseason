@@ -29,8 +29,9 @@ public class Drivetrain extends BreakerSwerveDrivetrain {
   private SwerveDriveWheelPositions prevModulePositions;
   private GtsamInterface gtsam;
 
-  public Drivetrain() {
+  public Drivetrain(GtsamInterface gtsam) {
     super(DRIVETRAIN_CONSTANTS, FRONT_LEFT_MODULE_CONSTANTS, FRONT_RIGHT_MODULE_CONSTANTS, BACK_LEFT_MODULE_CONSTANTS, BACK_RIGHT_MODULE_CONSTANTS);
+    this.gtsam = gtsam;
     registerTelemetry(this::odometryThreadCallback);
   }
 

@@ -2,10 +2,9 @@ package frc.robot.subsystems.vision.gtsam;
 
 import java.util.List;
 
-import org.opencv.core.Point;
 import org.photonvision.targeting.TargetCorner;
 
-class TagDetection {
+public class TagDetection {
     public final int id;
     public final List<TargetCorner> corners;
 
