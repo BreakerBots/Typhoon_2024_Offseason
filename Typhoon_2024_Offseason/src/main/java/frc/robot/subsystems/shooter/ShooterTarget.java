@@ -218,7 +218,7 @@ public class ShooterTarget {
 
     public record FireingSolution(Rotation2d robotYaw, ShooterState shooterState) {
         public static FireingSolution fromNoteVelocity(BreakerVector3 noteVelocityVector) {
-            Rotation3d vecRot = noteVelocityVector.getVectorRotation();
+            Rotation3d vecRot = noteVelocityVector.getAngle();
             double yaw = vecRot.getZ();
             double rawPitch = vecRot.getY();
             Rotation2d pitch = Rotation2d.fromRadians(rawPitch).plus(Rotation2d.fromDegrees(180));

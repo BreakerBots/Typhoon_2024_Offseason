@@ -7,9 +7,12 @@ package frc.robot.BreakerLib.physics;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.BreakerLib.util.math.interpolation.BreakerInterpolable;
 
@@ -66,12 +69,8 @@ public class BreakerVector3 implements BreakerInterpolable<BreakerVector3> {
     }
 
 
-    public static BreakerVector3 fromRowMatrix(Matrix<N1, N3> rowMatrix) {
-        return new BreakerVector3(rowMatrix.get(0, 0), rowMatrix.get(0, 1), rowMatrix.get(0, 2));
-    }
-
-    public static BreakerVector3 fromColumnMatrix(Matrix<N3, N1> columnMatrix) {
-        return new BreakerVector3(columnMatrix.get(0, 0), columnMatrix.get(1, 0), columnMatrix.get(2, 0));
+    public static BreakerVector3 fromVectorWPI(Vector<N3> vector) {
+        return new BreakerVector3(vector.get(0), vector.get(1), vector.get(2));
     }
 
     /** 
@@ -105,7 +104,7 @@ public class BreakerVector3 implements BreakerInterpolable<BreakerVector3> {
     /** 
      * @return Rotation3d
      */
-    public Rotation3d getVectorRotation() {
+    public Rotation3d getAngle() {
         return vectorRotation;
     }
 
@@ -183,20 +182,8 @@ public class BreakerVector3 implements BreakerInterpolable<BreakerVector3> {
         return new BreakerVector3(1, vectorRotation);
     }
 
-    public Matrix<N3, N1> getColumnMatrix() {
-        Matrix<N3, N1> mtrx = new Matrix<N3,N1>(Nat.N3(), Nat.N1());
-        mtrx.set(0, 0, x);
-        mtrx.set(1, 0, y);
-        mtrx.set(2, 0, z);
-        return mtrx;
-    }
-
-    public Matrix<N1, N3> getRowMatrix() {
-        Matrix<N1, N3> mtrx = new Matrix<N1,N3>(Nat.N1(), Nat.N3());
-        mtrx.set(0, 0, x);
-        mtrx.set(0, 1, y);
-        mtrx.set(0, 2, z);
-        return mtrx;
+    public Vector<N3> getVectorWPI() {
+        return VecBuilder.fill(x, y, z);
     }
 
     /** 

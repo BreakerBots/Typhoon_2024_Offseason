@@ -100,7 +100,7 @@ public class IntakeAssist extends Command {
         if (obj.label() == "note" && obj.isVisible())  {
         double distErr = obj.position().getGlobal(true).toTranslation2d().getDistance(state.Pose.getTranslation());
         double errorBound = 0.5;
-        double rawVecAngErr = filteredDriverReqVec.getVectorRotation().getRotations() - obj.position().getRobotToObject(true).toTranslation2d().getAngle().getRotations();
+        double rawVecAngErr = filteredDriverReqVec.getAngle().getRotations() - obj.position().getRobotToObject(true).toTranslation2d().getAngle().getRotations();
         double angErr = Math.abs(MathUtil.inputModulus(rawVecAngErr, -errorBound, errorBound));
         double errScore = (angErr * ANGLE_ERROR_SCAILAR) * (distErr * DIST_ERROR_SCAILAR);
         if (errScore <= MAX_ERROR_SCORE && angErr <= MAX_ANGLE_ERROR && distErr <= MAX_DIST_ERROR) {

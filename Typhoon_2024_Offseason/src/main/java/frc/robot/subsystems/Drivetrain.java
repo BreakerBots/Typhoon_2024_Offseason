@@ -23,9 +23,6 @@ import static frc.robot.Constants.DriveConstants.*;
 
 public class Drivetrain extends BreakerSwerveDrivetrain {
   /** Creates a new Drive. */
-
-  private ChassisSpeeds prevChassisSpeeds = new ChassisSpeeds();
-  private ChassisAccels chassisAccels = new ChassisAccels();
   private SwerveDriveWheelPositions prevModulePositions;
   private GtsamInterface gtsam;
 
@@ -36,10 +33,6 @@ public class Drivetrain extends BreakerSwerveDrivetrain {
   }
 
   private void odometryThreadCallback(SwerveDriveState state) {
-  
-    chassisAccels = ChassisAccels.fromDeltaSpeeds(prevChassisSpeeds, state.speeds, state.OdometryPeriod);
-    prevChassisSpeeds = state.speeds;
-
     if (prevModulePositions == null) {
       var posArr = new SwerveModulePosition[state.ModuleStates.length];
       for (int i = 0; i < posArr.length; i++) {
@@ -56,15 +49,6 @@ public class Drivetrain extends BreakerSwerveDrivetrain {
         );
     gtsam.sendOdomUpdate(WPIUtilJNI.now(), twist3, new Pose3d(state.Pose));
     
-  }
-
-  public ChassisAccels getChassisAccels() {
-    try {
-      m_stateLock.writeLock().lock();
-      return chassisAccels;
-    } finally {
-      m_stateLock.writeLock().unlock();
-    }
   }
   
 }

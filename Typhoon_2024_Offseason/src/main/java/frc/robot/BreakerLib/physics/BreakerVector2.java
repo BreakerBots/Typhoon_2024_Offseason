@@ -9,6 +9,8 @@ import static frc.robot.Constants.AmpBarConstants.RETRACTED_ANGLE_THRESHOLD;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -68,12 +70,8 @@ public class BreakerVector2 implements BreakerInterpolable<BreakerVector2> {
         this.vectorRotation = vectorRotation;
     }
 
-    public static BreakerVector2 fromRowMatrix(Matrix<N1, N2> rowMatrix) {
-        return new BreakerVector2(rowMatrix.get(0, 0), rowMatrix.get(0, 1));
-    }
-
-    public static BreakerVector2 fromColumnMatrix(Matrix<N2, N1> columnMatrix) {
-        return new BreakerVector2(columnMatrix.get(0, 0), columnMatrix.get(1, 0));
+    public static BreakerVector2 fromVectorWPI(Vector<N2> vector) {
+        return new BreakerVector2(vector.get(0), vector.get(1));
     }
 
     public static BreakerVector2 fromChassisSpeeds(ChassisSpeeds chassisSpeeds) {
@@ -92,7 +90,7 @@ public class BreakerVector2 implements BreakerInterpolable<BreakerVector2> {
     /** 
      * @return Rotation2d
      */
-    public Rotation2d getVectorRotation() {
+    public Rotation2d getAngle() {
         return vectorRotation;
     }
 
@@ -173,18 +171,8 @@ public class BreakerVector2 implements BreakerInterpolable<BreakerVector2> {
         return new Translation2d(x, y);
     }
 
-    public Matrix<N2, N1> getColumnMatrix() {
-        Matrix<N2, N1> mtrx = new Matrix<N2,N1>(Nat.N2(), Nat.N1());
-        mtrx.set(0, 0, x);
-        mtrx.set(1, 0, y);
-        return mtrx;
-    }
-
-    public Matrix<N1, N2> getRowMatrix() {
-        Matrix<N1, N2> mtrx = new Matrix<N1,N2>(Nat.N1(), Nat.N2());
-        mtrx.set(0, 0, x);
-        mtrx.set(0, 1, y);
-        return mtrx;
+    public Vector<N2> getVectorWPI() {
+        return VecBuilder.fill(x, y);
     }
     
     /** 

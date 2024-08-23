@@ -74,7 +74,7 @@ public class BreakerAnalogThumbstick  {
 
     public BreakerVector2 getVector() {
         BreakerVector2 vec = new BreakerVector2(getRawX() * (invertX ? -1 : 1), getRawY() * (invertY ? -1 : 1));
-        return new BreakerVector2(vec.getVectorRotation(), MathUtil.applyDeadband(vec.getMagnitude(), deadband));
+        return new BreakerVector2(vec.getAngle(), MathUtil.applyDeadband(vec.getMagnitude(), deadband));
     }
 
     /** @return X-axis value. */

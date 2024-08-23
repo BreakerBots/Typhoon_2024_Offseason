@@ -50,8 +50,8 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   protected Consumer<SwerveDriveState> userTelemetryCallback = null;
   /* Keep track if we've ever applied the operator perspective before or not */
   protected boolean hasAppliedOperatorPerspective = false;
-
-  protected SwerveModulePosition[] prevModulePositions;
+  protected ChassisSpeeds prevChassisSpeeds = new ChassisSpeeds();
+  protected ChassisAccels chassisAccels = new ChassisAccels();
 
   public BreakerSwerveDrivetrain(
     BreakerSwerveDrivetrainConstants driveTrainConstants, 
@@ -84,6 +84,9 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   }
   
   private void telemetryCallbackWrapperFunction(SwerveDriveState state) {
+    chassisAccels = ChassisAccels.fromDeltaSpeeds(prevChassisSpeeds, state.speeds, state.OdometryPeriod);
+    prevChassisSpeeds = state.speeds;
+    
     BreakerLog.log("SwerveDrivetrain/Pose", state.Pose);
     BreakerLog.log("SwerveDrivetrain/Speeds", state.speeds);
     BreakerLog.log("SwerveDrivetrain/ModuleStates", state.ModuleStates);
@@ -91,6 +94,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     BreakerLog.log("SwerveDrivetrain/SuccessfulDAQs", state.SuccessfulDaqs);
     BreakerLog.log("SwerveDrivetrain/FailedDAQs", state.FailedDaqs);
     BreakerLog.log("SwerveDrivetrain/OdometryPeriod", state.OdometryPeriod);
+    
     if (userTelemetryCallback != null) {
       userTelemetryCallback.accept(state);
     }
@@ -115,6 +119,15 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       } finally {
           m_stateLock.writeLock().unlock();
       }
+  }
+
+  public ChassisAccels getChassisAccels() {
+    try {
+      m_stateLock.writeLock().lock();
+      return chassisAccels;
+    } finally {
+      m_stateLock.writeLock().unlock();
+    }
   }
 
   public ChassisSpeeds getCurrentChassisSpeeds() {
