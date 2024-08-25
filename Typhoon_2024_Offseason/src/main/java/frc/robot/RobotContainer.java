@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.FieldConstants.*;
+
 import java.io.InputStream;
 import java.util.function.BooleanSupplier;
 
@@ -23,33 +25,42 @@ import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
+import frc.robot.Constants.AmpBarConstants;
+import frc.robot.Constants.ApriltagVisionConstants;
+import frc.robot.Constants.IntakeConstants2;
 import frc.robot.commands.amp.ScoreAmp;
 import frc.robot.commands.intake.HopperToIntakeHandoff;
 import frc.robot.commands.intake.IntakeAndHold;
 import frc.robot.commands.intake.IntakeAssist;
 import frc.robot.commands.intake.IntakeForShooter;
+import frc.robot.subsystems.AmpBar;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Intake.IntakePivotState;
-import frc.robot.subsystems.Intake.IntakeState;
+import frc.robot.subsystems.Intake2;
+import frc.robot.subsystems.Intake2.IntakeRollerState;
+import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterTarget;
+import frc.robot.subsystems.vision.ApriltagVision;
 import frc.robot.subsystems.vision.ZED;
+import frc.robot.subsystems.vision.gtsam.GtsamInterface;
 
 public class RobotContainer {
   public static final BreakerXboxController controller = new BreakerXboxController(0);
-  private final Drivetrain drivetrain = new Drivetrain();
-  private final Intake intake = new Intake();
+  private final GtsamInterface gtsamInterface = new GtsamInterface(ApriltagVisionConstants.CAMERA_NAMES);
+  private final Drivetrain drivetrain = new Drivetrain(gtsamInterface);
+  private final Intake2 intake = new Intake2();
   private final Shooter shooter = new Shooter(drivetrain::getChassisAccels);
   private final Hopper hopper = new Hopper();
+  private final AmpBar ampBar = new AmpBar();
+  private final ApriltagVision apriltagVision = new ApriltagVision(gtsamInterface);
   
   private final ZED zed = new ZED(null, null);
 
   private BreakerInputStream driverX, driverY, driverOmega;
   private SwerveRequest.FieldCentric teleopSwerveRequest;
-  private final ShooterTarget SPEAKER = new ShooterTarget(drivetrain, shooter, hopper);
-  private final ShooterTarget PASS = new ShooterTarget(drivetrain, shooter, hopper);
+  private final ShooterTarget SPEAKER = new ShooterTarget(drivetrain, shooter, hopper, BLUE_SPEAKER_AIM_POINT);
+  private final ShooterTarget PASS = new ShooterTarget(drivetrain, shooter, hopper, BLUE_PASS_AIM_POINT);
   public RobotContainer() {
     shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
@@ -92,7 +103,7 @@ public class RobotContainer {
     // AMP CONTROLS
     controller.getLeftBumper()//intake amp
       .and(hasNoNote)
-      .onTrue(new IntakeAndHold(intake, true)
+      .onTrue(new IntakeAndHold(intake, zed, true)
       .deadlineWith(new ConditionalCommand(
         Commands.print("Intake Assist Overridden"), 
         new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), 
@@ -103,24 +114,24 @@ public class RobotContainer {
       .onTrue(new HopperToIntakeHandoff(hopper, intake, true));
     controller.getLeftBumper()//score amp
       .and(intakeOnlyHasNote)
-      .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
-      .onTrue(new ScoreAmp(null, null));
+      .and(() -> intake.getSetpoint().goalState().pivotAngle().equals(IntakeConstants2.PIVOT_RETRACTED_ANGLE))
+      .onTrue(new ScoreAmp(intake, ampBar));
     controller.getLeftBumper()//prep for amp score
       .and(intakeOnlyHasNote)
-      .and(() -> intake.getState().getPivotState() != IntakePivotState.RETRACTED)
-      .onTrue(intake.setStateCommand(IntakeState.RETRACTED_NEUTRAL, false));
+      .and(() -> !intake.getSetpoint().goalState().pivotAngle().equals(IntakeConstants2.PIVOT_RETRACTED_ANGLE))
+      .onTrue(intake.setStateCommand(IntakeSetpoint.RETRACTED_NEUTRAL, false));
 
     // SHOOTER CONTROLS
     controller.getRightBumper()//intake shooter
       .and(hasNoNote)
-      .onTrue(new IntakeForShooter(intake, hopper, shooter)
+      .onTrue(new IntakeForShooter(intake, hopper, zed, shooter)
       .deadlineWith(new ConditionalCommand(
         Commands.print("Intake Assist Overridden"), 
         new IntakeAssist(drivetrain, intake, hopper, zed, driverX, driverY, driverOmega), 
         globalOverride)));
     controller.getRightBumper()//handoff from intake to hopper
       .and(intakeOnlyHasNote)
-      .onTrue(new IntakeForShooter(intake, hopper, shooter));
+      .onTrue(new IntakeForShooter(intake, hopper, zed, shooter));
     controller.getRightBumper()
       .and(hopperOnlyHasNote)
       .onTrue(SPEAKER.shootWhileMoveing(driverX, driverY));

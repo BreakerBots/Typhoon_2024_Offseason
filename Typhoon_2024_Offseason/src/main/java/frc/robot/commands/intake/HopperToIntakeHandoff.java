@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake2;
 import frc.robot.subsystems.Hopper.HopperState;
-import frc.robot.subsystems.Intake.IntakePivotState;
-import frc.robot.subsystems.Intake.IntakeState;
+// import frc.robot.subsystems.Intake.IntakePivotState;
+// import frc.robot.subsystems.Intake.IntakeState;
 import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more

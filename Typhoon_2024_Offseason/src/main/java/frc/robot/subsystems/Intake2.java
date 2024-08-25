@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
 import frc.robot.subsystems.Intake2.IntakeRollerState;
 import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
-import frc.robot.subsystems.vision.NoteVision;
+// import frc.robot.subsystems.vision.NoteVision;
 import frc.robot.subsystems.vision.ZED;
 import frc.robot.subsystems.vision.ZED.TrackedObject;
 
@@ -125,7 +125,7 @@ public class Intake2 extends SubsystemBase {
   }
 
   /** Dynaicly enables and disables intake rollers depeding on note visablity */
-  public Command smartRollerControlCommand(ZED zed, NoteVision noteVision, IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
+  public Command smartRollerControlCommand(ZED zed, /*NoteVision noteVision, */ IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
     Timer timer = new Timer();
     return new FunctionalCommand(()->{
       timer.stop();
@@ -134,7 +134,7 @@ public class Intake2 extends SubsystemBase {
       () -> {
         boolean isApplicableToCurrentState = RobotState.isTeleop();
         if (isApplicableToCurrentState) {
-          boolean shouldRun = noteVision.hasTarget();
+          boolean shouldRun = false;//noteVision.hasTarget();
           if (!shouldRun) {
             for (TrackedObject obj : zed.getTrackedObjects()) {
               double dist = obj.position().getRobotToObject(true).getNorm();

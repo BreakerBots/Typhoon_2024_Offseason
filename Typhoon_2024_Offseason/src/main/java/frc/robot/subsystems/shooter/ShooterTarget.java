@@ -39,6 +39,8 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -49,7 +51,8 @@ import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake2;
 import frc.robot.subsystems.shooter.Shooter.ShooterState;
 import frc.robot.subsystems.shooter.Shooter.SmartSpoolConfig;
 
@@ -79,7 +82,7 @@ public class ShooterTarget {
         driveRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
-    public Command runSmartSpool(Intake intake) {
+    public Command runSmartSpool(Intake2 intake) {
         return shooter.runShooter(() -> {
             double dist = drivetrain.getState().Pose.getTranslation().getDistance(getTargetPosition().toTranslation2d());
             ShooterState idealState = getStationaryShooterState(dist);
@@ -146,7 +149,16 @@ public class ShooterTarget {
     }
 
     public Translation3d getTargetPosition() {
-        return null;
+        Optional<Alliance> allainceOpt =  DriverStation.getAlliance();
+        if (allainceOpt.isPresent()) {
+            if (allainceOpt.get() == Alliance.Red) {
+                final double halfFieldWidth = 16.541/2.0;//Constants.FieldConstants.FIELD_WIDTH
+                double deltaX = halfFieldWidth - -0.29209999; //blueTargetPoint.getX();
+                double redX = halfFieldWidth + deltaX;
+                return new Translation3d(redX, blueTargetPoint.getY(), blueTargetPoint.getZ());
+            }
+        }
+        return blueTargetPoint; 
     }
 
 

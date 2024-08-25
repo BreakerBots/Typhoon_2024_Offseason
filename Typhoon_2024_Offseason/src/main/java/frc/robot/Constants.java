@@ -1,5 +1,9 @@
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.photonvision.simulation.SimCameraProperties;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -39,6 +43,7 @@ import frc.robot.subsystems.shooter.Shooter.ShooterState;
 
 public class Constants {
 
+
   public static class GeneralConstants {
     public static final String DRIVE_CANIVORE_NAME = "drive_canivore";
   }
@@ -47,7 +52,8 @@ public class Constants {
         public static final AprilTagFieldLayout APRILTAG_FIELD_LAYOUT = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
         public static final double FIELD_WIDTH = APRILTAG_FIELD_LAYOUT.getFieldWidth();
         public static final double FIELD_LENGTH = APRILTAG_FIELD_LAYOUT.getFieldLength();
-
+        public static final Translation3d BLUE_SPEAKER_AIM_POINT = new Translation3d(-0.038099999999999995, 5.547867999999999, 1.4511020000000001).plus(new Translation3d(edu.wpi.first.math.util.Units.inchesToMeters(-10.0), edu.wpi.first.math.util.Units.inchesToMeters(0), edu.wpi.first.math.util.Units.inchesToMeters(30.322)));
+        public static final Translation3d BLUE_PASS_AIM_POINT = new Translation3d();
   }
 
   public static class BatteryTrackerConstants {
@@ -62,6 +68,7 @@ public class Constants {
         public static final String FRONT_RIGHT_CAMERA_NAME = "";
         public static final String BACK_LEFT_CAMERA_NAME = "";
         public static final String BACK_RIGHT_CAMERA_NAME = "";
+        public static final List<String> CAMERA_NAMES = Arrays.asList(FRONT_LEFT_CAMERA_NAME, FRONT_RIGHT_CAMERA_NAME, BACK_LEFT_CAMERA_NAME, BACK_RIGHT_CAMERA_NAME);
 
         public static final SimCameraProperties SIM_CAMERA_PROPERTIES = new SimCameraProperties();
         

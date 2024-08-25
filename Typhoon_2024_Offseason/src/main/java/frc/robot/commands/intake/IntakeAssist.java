@@ -28,9 +28,9 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake2;
 import frc.robot.subsystems.Intake2.IntakeRollerState;
-import frc.robot.subsystems.vision.NoteVision;
+// import frc.robot.subsystems.vision.NoteVision;
 import frc.robot.subsystems.vision.ZED;
-import frc.robot.subsystems.vision.NoteVision.TrackedNote2D;
+// import frc.robot.subsystems.vision.NoteVision.TrackedNote2D;
 import frc.robot.subsystems.vision.ZED.TrackedObject;
 
 public class IntakeAssist extends Command {
@@ -50,7 +50,7 @@ public class IntakeAssist extends Command {
   private Intake2 intake;
   private Hopper hopper;
   private ZED zed;
-  private NoteVision nv;
+  // private NoteVision nv;
   private BreakerInputStream xStream;
   private BreakerInputStream yStream;
   private BreakerInputStream xStreamFiltered;
@@ -60,7 +60,7 @@ public class IntakeAssist extends Command {
   private PIDController omegaPID;
   private SwerveRequest.FieldCentric driveRequest;
   
-  public IntakeAssist(Drivetrain drive, Intake2 intake, Hopper hopper, ZED zed, NoteVision nv, BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
+  public IntakeAssist(Drivetrain drive, Intake2 intake, Hopper hopper, ZED zed, /*NoteVision nv, */ BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
     this.drive = drive;
     this.intake = intake;
     this.hopper = hopper;
@@ -92,7 +92,7 @@ public class IntakeAssist extends Command {
     double xOut = xStream.get();
     double yOut = yStream.get();
     double omegaOut = omegaStream.get();
-    if (!nv.hasTarget()) {
+    // if (!nv.hasTarget()) {
       Optional<Pair<TrackedObject, Double>> bestNote = Optional.empty();
       SwerveDriveState state = drive.getState();
       BreakerVector2 filteredDriverReqVec = new BreakerVector2(xStreamFiltered.get(), yStreamFiltered.get());
@@ -126,10 +126,10 @@ public class IntakeAssist extends Command {
           omegaOut = omegaPID.calculate(angToNote.getRotations(), state.Pose.getRotation().getRotations());
         }
       }
-    } else {
-      TrackedNote2D tgt = nv.getBestTarget().get();
-      omegaOut = omegaPID.calculate(tgt.yaw().getRotations(), 0.0);
-    }
+    // } else {
+    //   TrackedNote2D tgt = nv.getBestTarget().get();
+    //   omegaOut = omegaPID.calculate(tgt.yaw().getRotations(), 0.0);
+    // }
     driveRequest.withVelocityX(xOut).withVelocityY(yOut).withRotationalRate(omegaOut);
     drive.setControl(driveRequest);
   }

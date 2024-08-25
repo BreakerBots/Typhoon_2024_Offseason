@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Twist3d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
@@ -119,7 +120,7 @@ public class GtsamInterface {
      * @param distCoeffs Camera distortion coefficients, of length 4, 5 or 8
      */
     public void setCamIntrinsics(String camName, Optional<Matrix<N3, N3>> intrinsics,
-            Optional<Matrix<?, N1>> distCoeffs) {
+            Optional<Matrix<N5, N1>> distCoeffs) {
         if (intrinsics.isEmpty() || distCoeffs.isEmpty()) {
             return;
         }

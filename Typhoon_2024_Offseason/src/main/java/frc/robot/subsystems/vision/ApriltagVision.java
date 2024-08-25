@@ -92,7 +92,6 @@ public class ApriltagVision extends SubsystemBase {
 
   private void updateSim(Pose2d robotPose) {
     visionSim.update(robotPose);
-    drivetrain.getOdo
   }
 
   @Override
@@ -123,7 +122,7 @@ public class ApriltagVision extends SubsystemBase {
     }
     sortByStandardDeviation(estimatedPoses);
     for (Pair<EstimatedRobotPose, Vector<N3>> estPose : estimatedPoses) {
-      drivetrain.addVisionMeasurement(estPose.getFirst().estimatedPose, estPose.getFirst().timestampSeconds, estPose.getSecond());
+      drivetrain.addVisionMeasurement(estPose.getFirst().estimatedPose.toPose2d(), estPose.getFirst().timestampSeconds, estPose.getSecond());
     }
   }
 
