@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.subsystems.Intake2.IntakeRollerState;
 import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
 // import frc.robot.subsystems.vision.NoteVision;
@@ -27,6 +29,7 @@ import static frc.robot.Constants.IntakeConstants.SMART_ROLLER_MAX_WAIT_FOR_DET;
 import static frc.robot.Constants.IntakeConstants2.*;
 import static java.lang.Math.round;
 
+import java.util.Currency;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -121,8 +124,23 @@ public class Intake2 extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    IntakeState currentState = getCurrentState();
+    if (RobotState.isDisabled()) {
+      Rotation2d curPos = currentState.pivotAngle;
+
+    }
+    BreakerLog.log("Intake/HasNote", beamBreak.isBroken());
+    BreakerLog.log("Intake/Position", currentState.pivotAngle.getRotations());
+    BreakerLog.log("Intake/Setpoint/Position", setpoint.goalState.pivotAngle);
+    BreakerLog.log("Intake/Setpoint/RollerState", setpoint.goalState.rollerState);
+    BreakerLog.log("Intake/Setpoint/Tolerence", setpoint.pivotTolerence.in(Units.Rotation));
+    BreakerLog.log("Intake/Setpoint/AtSetpoint", atSetpoint());
+    BreakerLog.log("Intake/RollerMotor", rollerMotor);
+    BreakerLog.log("Intake/LeftPivotMotor", leftPivot);
+    BreakerLog.log("Intake/RightPivotMotor", rightPivot);
   }
+
+ 
 
   /** Dynaicly enables and disables intake rollers depeding on note visablity */
   public Command smartRollerControlCommand(ZED zed, /*NoteVision noteVision, */ IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
