@@ -176,3 +176,9 @@ logs/
 
 # Folder that has CTRE Phoenix Sim device config storage
 ctre_sim/
+
+# Simulation GUI and other tools window save file
+*-window.json
+
+#chached src control data from last build event
+src/main/java/frc/robot/BuildConstants.java

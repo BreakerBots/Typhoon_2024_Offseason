@@ -67,7 +67,6 @@ public class RobotContainer {
     BreakerLog.setOptions(new DogLogOptions(true, false, true, true, 2000)); 
     BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
     BreakerLog.setEnabled(true);
-     
   }
 
   private void configureControls() {
