@@ -7,10 +7,12 @@ package frc.robot.subsystems.vision;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -19,15 +21,18 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.net.WPINetJNI;
 import edu.wpi.first.networktables.BooleanArraySubscriber;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.IntegerArraySubscriber;
 import edu.wpi.first.networktables.IntegerSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.networktables.PubSub;
 import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.networktables.TimestampedInteger;
+import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructDescriptor;
 import edu.wpi.first.util.struct.StructSerializable;
@@ -129,19 +134,40 @@ public class ZED extends SubsystemBase {
   }
 
   private void readTargets() {
+    long[] ids = idSub.get();
+    String[] lables = labelSub.get();
+    TimestampedInteger latency = latencySub.getAtomic();
+    double captureTimestamp = (((double)(latency.timestamp)) - (((double)(latency.value)) / 1000.0)) / ((double)(1e6));
     
+    for (int i = 0; i < ids.length; i++) {
+      
+    }
   }
 
   public static final record TrackedObject(
-    int objectID, 
-    String label,
-    double timestamp,
-    BreakerVector3 velocity,
-    ObjectPosition position,
-    ObjectDimensions cameraRelitiveDimensions,
-    double confidance,
-    boolean isVisible,
-    boolean isMoveing,
-    Optional<TrackedObject> prevInstance
-  ) {} 
+      long objectID, 
+      String label,
+      double timestamp,
+      ObjectMotion motion,
+      ObjectPosition position,
+      ObjectDimensions cameraRelitiveDimensions,
+      double confidance,
+      boolean isVisible,
+      boolean isMoveing) implements Comparable<TrackedObject> {
+
+    @Override
+    public int compareTo(TrackedObject otherTracked) {
+        return (int) (MathUtil.clamp(otherTracked.objectID - objectID, (long) Integer.MIN_VALUE, (long) Integer.MAX_VALUE));
+    }
+
+    @Override
+    public boolean equals(Object object) {
+      if (object instanceof TrackedObject) {
+        var otherTracked = (TrackedObject) object;
+        return otherTracked.objectID == objectID;
+      }
+      return false;
+    }
+    
+  } 
 }
