@@ -39,6 +39,7 @@ import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.physics.BreakerVector3;
+import frc.robot.subsystems.vision.ZED.TrackedObject;
 
 public class ZED extends SubsystemBase {
   /** Creates a new ZED. */
@@ -100,6 +101,22 @@ public class ZED extends SubsystemBase {
     public BreakerVector3 getGlobal() {
       return null;
     }
+  }
+  
+  private static final record RawObjectPosition(Translation3d cameraToObject, Transform3d robotToCamera, Pose3d globalRobotPose) {
+    public Translation3d getCameraToObject(){
+      return cameraToObject;
+    }
+
+    public Translation3d getRobotToObject(){
+      Transform3d invTransf = robotToCamera.inverse();
+      return cameraToObject.rotateBy(invTransf.getRotation()).plus(invTransf.getTranslation()); //??
+    }
+
+    public Translation3d getGlobal() {
+      return 
+    }
+
   }
 
   public static final class ObjectPosition {

@@ -126,8 +126,14 @@ public class Intake2 extends SubsystemBase {
   public void periodic() {
     IntakeState currentState = getCurrentState();
     if (RobotState.isDisabled()) {
-      Rotation2d curPos = currentState.pivotAngle;
-
+      double curPos = currentState.pivotAngle.getRadians();
+      double errToExt = Math.abs(PIVOT_EXTENDED_ANGLE.getRadians() - curPos);
+      double errToRet = Math.abs(PIVOT_RETRACTED_ANGLE.getRadians() - curPos);
+      if (errToExt < errToRet) {
+        setState(IntakeSetpoint.EXTENDED_NEUTRAL);
+      } else {
+        setState(IntakeSetpoint.RETRACTED_NEUTRAL);
+      }
     }
     BreakerLog.log("Intake/HasNote", beamBreak.isBroken());
     BreakerLog.log("Intake/Position", currentState.pivotAngle.getRotations());
