@@ -103,33 +103,39 @@ public class ZED extends SubsystemBase {
     }
   }
   
-  private static final record RawObjectPosition(Translation3d cameraToObject, Transform3d robotToCamera, Pose3d globalRobotPose) {
-    public Translation3d getCameraToObject(){
-      return cameraToObject;
-    }
+  // private static final record RawObjectPosition(Translation3d cameraToObject, Transform3d robotToCamera, Pose3d globalRobotPose) {
+  //   public Translation3d getCameraToObject(){
+  //     return cameraToObject;
+  //   }
 
-    public Translation3d getRobotToObject(){
-      Transform3d invTransf = robotToCamera.inverse();
-      return cameraToObject.rotateBy(invTransf.getRotation()).plus(invTransf.getTranslation()); //??
-    }
+  //   public Translation3d getRobotToObject(){
+  //     Transform3d invTransf = robotToCamera.inverse();
+  //     return cameraToObject.rotateBy(invTransf.getRotation()).plus(invTransf.getTranslation()); //??
+  //   }
 
-    public Translation3d getGlobal() {
-      return 
-    }
+  //   public Translation3d getGlobal() {
+  //     return 
+  //   }
 
-  }
+  // }
 
   public static final class ObjectPosition {
+    private double timestamp;
+    private ObjectMotion motion;
+    private Translation3d cameraToObjectTranslation;
     public ObjectPosition(double timestamp, ObjectMotion motion, Translation3d cameraToObjectTranslation, Transform3d robotToCameraTransform, Pose2d globalRobotPose) {
 
       
     }
 
     public Translation3d getCameraToObject(boolean compensateForLatency) {
+      double latency = Timer.getFPGATimestamp() - timestamp;
+      Translation3d pos = cameraToObjectTranslation;
       if (compensateForLatency) {
-
+        Translation3d trans = motion.getCameraRelative().times(latency).getAsTranslation();
+        pos = pos.plus(trans);
       }
-      return null;
+      return pos;
     }
 
     public Translation3d getRobotToObject(boolean compensateForLatency) {
