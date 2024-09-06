@@ -12,7 +12,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import edu.wpi.first.apriltag.AprilTagDetector;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.CoordinateSystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -139,6 +141,8 @@ public class ZED extends SubsystemBase {
     }
 
     public Translation3d getRobotToObject(boolean compensateForLatency) {
+      Translation3d camRelTrans = getCameraToObject(compensateForLatency);
+      camRelTrans.rotateBy(null)
       return null;
     }
 
