@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.choreo.ChoreoAutoFactory.ChoreoAutoBindings;
 import frc.robot.choreo.trajectory.ChoreoTrajectory;
 
 import java.io.BufferedReader;
@@ -22,6 +23,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+
+import com.google.gson.Gson;
 
 /** Utilities to load and follow ChoreoTrajectories */
 public final class Choreo {

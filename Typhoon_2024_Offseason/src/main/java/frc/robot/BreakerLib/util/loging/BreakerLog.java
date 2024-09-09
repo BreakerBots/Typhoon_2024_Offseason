@@ -14,6 +14,8 @@ import dev.doglog.AdvantageKitCompatibleLogger;
 import dev.doglog.DogLog;
 import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import frc.robot.BuildConstants;
 import frc.robot.BreakerLib.physics.BreakerVector2;
@@ -49,11 +51,15 @@ public class BreakerLog extends DogLog {
 
     public static void log(String key, ChoreoTrajectory value) {
         log(key + "/Poses", value.getPoses());
-        log(key + "/StartingPose", value.gets)
+        log(key + "/InitialState", value.getInitialState());
+        log(key + "/FinalState", value.getFinalState());
+        log(key + "/TotalTime", value.getTotalTime());
     }
 
     public static void log(String key, ChoreoTrajectoryState value) {
         log(key + "/Pose", new Pose2d(value.x, value.y, Rotation2d.fromRadians(value.heading)));
+        log(key + "/ChassisSpeeds", new ChassisSpeeds(value.velocityX, value.velocityY, value.angularVelocity));
+        log(key + "/Timestamp", value.timestamp);
     }
 
     public static void log(String key, TalonFX value) {
