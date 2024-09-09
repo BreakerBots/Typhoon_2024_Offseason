@@ -4,39 +4,56 @@
 
 package frc.robot.BreakerLib.util.loging;
 
+import java.util.ArrayList;
+
+import org.apache.commons.math3.linear.Array2DRowFieldMatrix;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import dev.doglog.AdvantageKitCompatibleLogger;
 import dev.doglog.DogLog;
 import dev.doglog.DogLogOptions;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import frc.robot.BuildConstants;
 import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.util.BreakerLibVersion;
+import frc.robot.choreo.ChoreoAutoTrajectory;
+import frc.robot.choreo.trajectory.ChoreoTrajectory;
+import frc.robot.choreo.trajectory.ChoreoTrajectoryState;
 
 /** Add your docs here. */
 public class BreakerLog extends DogLog {
 
     
     public static void log(String key, BreakerVector2 value) {
-        log(key + "/x", value.getX());
-        log(key + "/y", value.getY());
-        log(key + "/angle", value.getAngle());
+        log(key + "/X", value.getX());
+        log(key + "/Y", value.getY());
+        log(key + "/Angle", value.getAngle());
     }
 
     public static void log(String key, BreakerVector3 value) {
-        log(key + "/x", value.getX());
-        log(key + "/y", value.getY());
-        log(key + "/z", value.getZ());
-        log(key + "/angle", value.getAngle());
+        log(key + "/X", value.getX());
+        log(key + "/Y", value.getY());
+        log(key + "/Z", value.getZ());
+        log(key + "/Angle", value.getAngle());
     }
 
     public static void log(String key, ChassisAccels value) {
-        log(key + "/x", value.getX());
-        log(key + "/y", value.getY());
-        log(key + "/alpha", value.getAlpha());
+        log(key + "/X", value.getX());
+        log(key + "/Y", value.getY());
+        log(key + "/Alpha", value.getAlpha());
+    }
+
+    public static void log(String key, ChoreoTrajectory value) {
+        log(key + "/Poses", value.getPoses());
+        log(key + "/StartingPose", value.gets)
+    }
+
+    public static void log(String key, ChoreoTrajectoryState value) {
+        log(key + "/Pose", new Pose2d(value.x, value.y, Rotation2d.fromRadians(value.heading)));
     }
 
     public static void log(String key, TalonFX value) {

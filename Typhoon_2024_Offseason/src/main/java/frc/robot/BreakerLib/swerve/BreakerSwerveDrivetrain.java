@@ -4,6 +4,9 @@
 
 package frc.robot.BreakerLib.swerve;
 
+import static frc.robot.Constants.DriveConstants.DRIVETRAIN_CONSTANTS;
+import static java.lang.Math.abs;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -20,6 +23,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.geometry.proto.Twist2dProto;
@@ -34,9 +38,14 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.BreakerLib.auto.BreakerSwerveAutoController;
 import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
+import frc.robot.choreo.Choreo;
+import frc.robot.choreo.ChoreoAutoFactory;
+import frc.robot.choreo.ChoreoAutoFactory.ChoreoAutoBindings;
+import frc.robot.choreo.trajectory.ChoreoTrajectory;
 import frc.robot.subsystems.Hopper;
 
 public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
@@ -52,6 +61,8 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   protected boolean hasAppliedOperatorPerspective = false;
   protected ChassisSpeeds prevChassisSpeeds = new ChassisSpeeds();
   protected ChassisAccels chassisAccels = new ChassisAccels();
+
+  protected ChoreoAutoFactory autoFactory;
 
   public BreakerSwerveDrivetrain(
     BreakerSwerveDrivetrainConstants driveTrainConstants, 
@@ -81,6 +92,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       startSimThread();
     }
     configPathPlanner();
+    configChoreo();
   }
   
   private void telemetryCallbackWrapperFunction(SwerveDriveState state) {
@@ -161,6 +173,17 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       this); // Subsystem for requirements
   }
 
+  private void configChoreo() {
+    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
+    PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
+    PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kD);
+    autoFactory = Choreo.createAutoFactory(this, this.getState().Pose, new BreakerSwerveAutoController(x, y, r), (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, DRIVETRAIN_CONSTANTS.choreoAutoBindings, this::logChoreoPath);
+  }
+
+  protected void logChoreoPath(ChoreoTrajectory trajectory, boolean started) {
+
+  }
+
   private void startSimThread() {
         lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -205,6 +228,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public double simUpdateFrequency = 200;
     public Rotation2d blueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
     public Rotation2d redAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
+    public ChoreoAutoBindings choreoAutoBindings;
 
     public BreakerSwerveDrivetrainConstants() {
       super();
@@ -260,6 +284,11 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public BreakerSwerveDrivetrainConstants withRedAlliancePerspectiveRotation(Rotation2d perspectiveRotation) {
       redAlliancePerspectiveRotation = perspectiveRotation;
+      return this;
+    }
+
+    public BreakerSwerveDrivetrainConstants withChoreoAutoBindings(ChoreoAutoBindings autoBindings) {
+      choreoAutoBindings = autoBindings;
       return this;
     }
 
