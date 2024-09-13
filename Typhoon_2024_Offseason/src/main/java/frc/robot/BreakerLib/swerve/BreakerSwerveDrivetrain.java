@@ -17,6 +17,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -44,6 +45,7 @@ import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.choreo.Choreo;
 import frc.robot.choreo.ChoreoAutoFactory;
+import frc.robot.choreo.ChoreoAutoLoop;
 import frc.robot.choreo.ChoreoAutoFactory.ChoreoAutoBindings;
 import frc.robot.choreo.trajectory.ChoreoTrajectory;
 import frc.robot.subsystems.Hopper;
@@ -177,11 +179,15 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
     PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
     PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kD);
-    autoFactory = Choreo.createAutoFactory(this, this.getState().Pose, new BreakerSwerveAutoController(x, y, r), (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, DRIVETRAIN_CONSTANTS.choreoAutoBindings, this::logChoreoPath);
+    autoFactory = Choreo.createAutoFactory(this, () -> this.getState().Pose, new BreakerSwerveAutoController(x, y, r), (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, DRIVETRAIN_CONSTANTS.choreoAutoBindings, this::logChoreoPath);
   }
 
   protected void logChoreoPath(ChoreoTrajectory trajectory, boolean started) {
 
+  }
+
+  public ChoreoAutoFactory getAutoFactory() {
+    return autoFactory;
   }
 
   private void startSimThread() {
