@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.apriltag.AprilTagDetector;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.CoordinateAxis;
 import edu.wpi.first.math.geometry.CoordinateSystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -66,12 +67,29 @@ public class ZED extends SubsystemBase {
   private long lastHeartbeat = -1;
   private Timer timeSinceLastUpdate;
 
+  private Transform3d robotToZedLeftEye;
+  private CoordinateSystem coordinateSystem;
+
   public ZED(Function<Double, Pose2d> robotPoseAtTimeFunc, Function<Double, ChassisSpeeds> chassisSpeedsAtTimeFunc) {
 
+    coordinateSystem = getZedCoordinateSystem();
+  }
+
+  private CoordinateSystem getZedCoordinateSystem() {
+    Translation3d zed_X = new Translation3d(1.0, 0.0, 0.0);
+    Translation3d zed_y = new Translation3d(0.0, 1.0, 0.0);
+    Translation3d zed_z = new Translation3d(1.0, 0.0, 1.0);
+    zed_X = zed_X.rotateBy(robotToZedLeftEye.getRotation());
+    zed_y = zed_y.rotateBy(robotToZedLeftEye.getRotation());
+    zed_z = zed_z.rotateBy(robotToZedLeftEye.getRotation());
+    return new CoordinateSystem(
+      new CoordinateAxis(zed_X.getX(), zed_X.getY(), zed_X.getZ()), 
+      new CoordinateAxis(zed_y.getX(), zed_y.getY(), zed_y.getZ()), 
+      new CoordinateAxis(zed_z.getX(), zed_z.getY(), zed_z.getZ()));
   }
 
   public Transform3d getRobotToCameraTransform() {
-    return null;
+    return ;
   }
 
   private ArrayList<TrackedObject> trackedObjects;
