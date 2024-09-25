@@ -18,6 +18,7 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.BreakerLib.util.math.interpolation.BreakerInterpolable;
 
 /**
@@ -70,10 +71,9 @@ public class BreakerVector2 implements BreakerInterpolable<BreakerVector2> {
         this.vectorRotation = vectorRotation;
     }
 
-    public static BreakerVector2 fromVectorWPI(Vector<N2> vector) {
-        return new BreakerVector2(vector.get(0), vector.get(1));
+    public BreakerVector2(Vector<N2> vector) {
+        this(vector.get(0), vector.get(1));
     }
-
     public static BreakerVector2 fromChassisSpeeds(ChassisSpeeds chassisSpeeds) {
         return new BreakerVector2(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
     }

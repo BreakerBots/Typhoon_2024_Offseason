@@ -68,9 +68,8 @@ public class BreakerVector3 implements BreakerInterpolable<BreakerVector3> {
         this(translationToVectorize.getX(), translationToVectorize.getY(), translationToVectorize.getY());
     }
 
-
-    public static BreakerVector3 fromVectorWPI(Vector<N3> vector) {
-        return new BreakerVector3(vector.get(0), vector.get(1), vector.get(2));
+    public BreakerVector3(Vector<N3> vector) {
+        this(vector.get(0), vector.get(1), vector.get(2));
     }
 
     /** 

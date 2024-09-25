@@ -76,9 +76,9 @@ public class ZED extends SubsystemBase {
   }
 
   private CoordinateSystem getZedCoordinateSystem() {
-    Translation3d zed_X = new Translation3d(1.0, 0.0, 0.0);
-    Translation3d zed_y = new Translation3d(0.0, 1.0, 0.0);
-    Translation3d zed_z = new Translation3d(1.0, 0.0, 1.0);
+    BreakerVector3 zed_X = new BreakerVector3(1.0, 0.0, 0.0);
+    BreakerVector3 zed_y = new BreakerVector3(0.0, 1.0, 0.0);
+    BreakerVector3 zed_z = new BreakerVector3(1.0, 0.0, 1.0);
     zed_X = zed_X.rotateBy(robotToZedLeftEye.getRotation());
     zed_y = zed_y.rotateBy(robotToZedLeftEye.getRotation());
     zed_z = zed_z.rotateBy(robotToZedLeftEye.getRotation());
@@ -106,38 +106,28 @@ public class ZED extends SubsystemBase {
   public static final record ObjectDimensions(double width, double height, double length) {}
 
   public static final class ObjectMotion {
-    public ObjectMotion(double timestamp, BreakerVector3 observedCameraRelativeObjectMotion, Transform3d robotToCameraTransform, Pose3d globalRobotPose) {
+    private BreakerVector3 observedCameraRelativeObjectMotion;
+    private CoordinateSystem cameraCoordinateSystem;
+    ObjectMotion(double timestamp, 
+    BreakerVector3 observedCameraRelativeObjectMotion, 
+    Pose3d globalRobotPose,
+    CoordinateSystem cameraCoordinateSystem) {
 
     }
     
     public BreakerVector3 getCameraRelative () {
-      return null;
+      return observedCameraRelativeObjectMotion;
     }
 
     public BreakerVector3 getRobotRelative() {
-      return null;
+      return new BreakerVector3(CoordinateSystem.convert(getCameraRelative().getAsTranslation(), cameraCoordinateSystem, CoordinateSystem.NWU()));
     }
 
     public BreakerVector3 getGlobal() {
-      return null;
+      return ;
     }
   }
   
-  // private static final record RawObjectPosition(Translation3d cameraToObject, Transform3d robotToCamera, Pose3d globalRobotPose) {
-  //   public Translation3d getCameraToObject(){
-  //     return cameraToObject;
-  //   }
-
-  //   public Translation3d getRobotToObject(){
-  //     Transform3d invTransf = robotToCamera.inverse();
-  //     return cameraToObject.rotateBy(invTransf.getRotation()).plus(invTransf.getTranslation()); //??
-  //   }
-
-  //   public Translation3d getGlobal() {
-  //     return 
-  //   }
-
-  // }
 
   public static final class ObjectPosition {
     private double timestamp;
