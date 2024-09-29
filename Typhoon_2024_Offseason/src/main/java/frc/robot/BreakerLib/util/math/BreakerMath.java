@@ -8,12 +8,16 @@ import java.util.function.Supplier;
 import javax.lang.model.type.MirroredTypeException;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.CoordinateAxis;
+import edu.wpi.first.math.geometry.CoordinateSystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.BreakerLib.physics.BreakerVector2;
+import frc.robot.BreakerLib.physics.BreakerVector3;
 
 /** BreakerLib math util class. */
 public class BreakerMath {
@@ -257,5 +261,19 @@ public class BreakerMath {
         }
         return output;
     }
+
+    public static CoordinateSystem getCoordinateSystemFromRotation(Rotation3d rot) {
+    BreakerVector3 x = new BreakerVector3(1.0, 0.0, 0.0);
+    BreakerVector3 y = new BreakerVector3(0.0, 1.0, 0.0);
+    BreakerVector3 z = new BreakerVector3(1.0, 0.0, 1.0);
+    x = x.rotateBy(rot);
+    y = y.rotateBy(rot);
+    z = z.rotateBy(rot);
+    return new CoordinateSystem(
+      new CoordinateAxis(x.getX(), x.getY(), x.getZ()), 
+      new CoordinateAxis(y.getX(), y.getY(), y.getZ()), 
+      new CoordinateAxis(z.getX(), z.getY(), z.getZ()));
+  }
+
 
 }

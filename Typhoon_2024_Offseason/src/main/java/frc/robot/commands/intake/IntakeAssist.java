@@ -26,8 +26,9 @@ import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake2;
-import frc.robot.subsystems.Intake2.IntakeRollerState;
+import frc.robot.subsystems.Intake.IntakeRollerState;
 // import frc.robot.subsystems.vision.NoteVision;
 import frc.robot.subsystems.vision.ZED;
 // import frc.robot.subsystems.vision.NoteVision.TrackedNote2D;
@@ -47,7 +48,7 @@ public class IntakeAssist extends Command {
   private static final double MIN_ACTIVE_TRANSLATIONAL_INPUT = 0.05;
 
   private Drivetrain drive;
-  private Intake2 intake;
+  private Intake intake;
   private Hopper hopper;
   private ZED zed;
   // private NoteVision nv;
@@ -60,7 +61,7 @@ public class IntakeAssist extends Command {
   private PIDController omegaPID;
   private SwerveRequest.FieldCentric driveRequest;
   
-  public IntakeAssist(Drivetrain drive, Intake2 intake, Hopper hopper, ZED zed, /*NoteVision nv, */ BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
+  public IntakeAssist(Drivetrain drive, Intake intake, Hopper hopper, ZED zed, /*NoteVision nv, */ BreakerInputStream xStream, BreakerInputStream yStream, BreakerInputStream omegaStream) {
     this.drive = drive;
     this.intake = intake;
     this.hopper = hopper;
@@ -141,6 +142,6 @@ public class IntakeAssist extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return intake.getSetpoint().goalState().rollerState() != IntakeRollerState.INTAKEING || intake.hasNote() || hopper.hasNote();
+    return intake.getState().getRollerState() != IntakeRollerState.INTAKEING || intake.hasNote() || hopper.hasNote();
   }
 }

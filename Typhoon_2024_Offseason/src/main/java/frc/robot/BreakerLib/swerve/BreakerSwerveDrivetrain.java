@@ -234,7 +234,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public double simUpdateFrequency = 200;
     public Rotation2d blueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
     public Rotation2d redAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
-    public ChoreoAutoBindings choreoAutoBindings;
+    public ChoreoAutoBindings choreoAutoBindings = new ChoreoAutoBindings();
 
     public BreakerSwerveDrivetrainConstants() {
       super();

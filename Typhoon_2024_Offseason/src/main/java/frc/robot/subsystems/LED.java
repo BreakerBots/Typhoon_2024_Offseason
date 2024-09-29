@@ -4,66 +4,157 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.led.Animation;
-import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.CANdleConfiguration;
-import com.ctre.phoenix.led.RainbowAnimation;
-import com.ctre.phoenix.led.RgbFadeAnimation;
-import com.ctre.phoenix.led.StrobeAnimation;
-import com.ctre.phoenix.led.CANdle.LEDStripType;
-import com.ctre.phoenix.led.CANdle.VBatOutputMode;
+import java.util.Optional;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.BreakerLib.devices.BreakerRevBlinkin;
+import frc.robot.BreakerLib.devices.BreakerRevBlinkin.FixedPalettePattern;
+import frc.robot.BreakerLib.devices.BreakerRevBlinkin.SolidColor;
+import frc.robot.BreakerLib.driverstation.dashboard.BreakerDashboard;
+
 
 public class LED extends SubsystemBase {
-  private CANdle candle;
-  private static final int LED_COUNT = 300;
+  public static class Patterns {
+    private Optional<FixedPalettePattern> fixedPalettePattern = Optional.empty();
+    private Optional<SolidColor> solidColor = Optional.empty();
+
+    public Patterns(FixedPalettePattern pattern) {
+      fixedPalettePattern = Optional.of(pattern);
+    }
+
+    public Patterns(SolidColor color) {
+      solidColor = Optional.of(color);
+    }
+
+    public boolean isFixedPalettePattern() {
+      return fixedPalettePattern.isPresent();
+    }
+
+    public boolean isSolidColor() {
+      return solidColor.isPresent();
+    }
+    
+    public FixedPalettePattern getFixedPalettePattern() {
+      return fixedPalettePattern.get();
+    }
+
+    public SolidColor getSolidColor() {
+      return solidColor.get();
+    }
+     
+  }
+  public enum LEDState {
+    INTAKING_FOR_SHOOTER(SolidColor.SKY_BLUE),
+    INTAKING_FOR_AMP(SolidColor.GOLD),
+    EXTAKING(FixedPalettePattern.HEARTBEAT_BLUE),
+    
+    SHOOTING_TO_SPEAKER(FixedPalettePattern.STROBE_BLUE),
+    SCORING_IN_AMP(SolidColor.BLUE_VIOLET),
+    PERSUING_NOTE(FixedPalettePattern.RAINBOW_GLITTER),
+    
+    ENABLED_WITH_NOTE(FixedPalettePattern.STROBE_GOLD),
+    ENABLED(FixedPalettePattern.BREATH_BLUE), // should be 'default' state
+    
+    SPOOLING_FLYWHEEL(FixedPalettePattern.CONFETTI),
+
+    ERROR(FixedPalettePattern.HEARBEAT_RED),
+    FLASH_ON_INTAKE(FixedPalettePattern.STROBE_GOLD);
+
+    private Patterns pattern;
+
+
+    private LEDState(FixedPalettePattern pattern) {
+      this.pattern = new Patterns(pattern);
+    }
+
+    private LEDState(SolidColor color) {
+      this.pattern = new Patterns(color);
+    }
+
+    public Patterns getPattern() {
+      return pattern;
+    }
+
+  }
+  
+  private final BreakerRevBlinkin blinkin;
+  private LEDState currentState;
+  private boolean isErrored = false;
+
+  /** Subsystem for managing LED lights on the robot using a state machine. */
   public LED() {
-    candle = new CANdle(0);
-    CANdleConfiguration config = new CANdleConfiguration();
-    config.statusLedOffWhenActive = true;
-    config.disableWhenLOS = false;
-    config.stripType = LEDStripType.GRB;
-    config.brightnessScalar = 1.0;
-    config.vBatOutputMode = VBatOutputMode.Modulated;
-    candle.configAllSettings(config);
-    
+    blinkin = new BreakerRevBlinkin(0);
+    currentState = LEDState.ENABLED;
+    blinkin.setSolidColor(SolidColor.WHITE);
+    updateBlinkin();
   }
 
-  public void setAnimation(AnimationType type) {
-
+  public Command setErroringCommand() {
+    return runOnce(() -> setErroring());
   }
 
-  public Command setAnimationCommand(AnimationType type) {
-    return Commands.runOnce(() -> setAnimation(type), this);
+  public Command clearErrorCommand(boolean hasNote) {
+    return runOnce(() -> clearError(hasNote));
   }
 
-  public static class ColorRefrence {
-    public static final Color8Bit ORANGE = new Color8Bit(Color.kOrange);
-    public static final Color8Bit YELLOW = new Color8Bit(Color.kYellow);
-    public static final Color8Bit RED = new Color8Bit(Color.kRed);
+  public void setErroring() {
+    setState(LEDState.ERROR);
+    isErrored = true;
   }
 
-  public static enum AnimationType {
-    DISABLED(new RgbFadeAnimation(1, 0.5, LED_COUNT)),
-    ENABLED(new RainbowAnimation(1, 1, LED_COUNT)),
-    ERROR(new StrobeAnimation(ColorRefrence.RED.red, ColorRefrence.RED.green, ColorRefrence.RED.blue, 0, 0.5, LED_COUNT, 0)),
-    ENABLED_WITH_NOTE_IN_HOPPER(new StrobeAnimation(ColorRefrence.ORANGE.red, ColorRefrence.ORANGE.green, ColorRefrence.ORANGE.blue, 0, 0.5, LED_COUNT, 0)),
-    ENABLED_WITH_NOTE_IN_INTAKE(new StrobeAnimation(ColorRefrence.YELLOW.red, ColorRefrence.YELLOW.green, ColorRefrence.YELLOW.blue, 0, 0.5, LED_COUNT, 0))
-    
-    ;
-    private AnimationType(Animation anim) {
-      AddressableLED.
+  public void clearError(boolean hasNote) {
+    isErrored = false;
+    setRestState(hasNote);
+  }
+
+  public Command setStateCommand(LEDState state) {
+    return runOnce(() -> setState(state));
+  }
+
+  /**
+   * Returns to the 'default' state, which is either {@code LEDState.ENABLED} or {@code LEDState.ENABLED_WITH_NOTE}
+   * 
+   * @return nothing
+   */
+  public Command returnToRestState(boolean hasNote) {
+    return runOnce(() -> {
+      setRestState(hasNote);
+    });
+  }
+
+  public void setRestState(boolean hasNote) {
+    if (hasNote) {
+        setState(LEDState.ENABLED_WITH_NOTE);
+      } else {
+        setState(LEDState.ENABLED);
+      }
+  }
+
+  public void setState(LEDState state) {
+    if (isErrored) return; // allow error colors to always take priority
+
+    currentState = state;
+    updateBlinkin();
+  }
+
+  private void updateBlinkin() {
+    Patterns pattern = currentState.getPattern();
+    if (pattern.isFixedPalettePattern()) {
+      blinkin.setFixedPalettePattern(pattern.getFixedPalettePattern());
+    } else {
+      blinkin.setSolidColor(pattern.getSolidColor());
     }
   }
 
+  public LEDState getCurrentState() {
+    return currentState;
+  }
   @Override
   public void periodic() {
+    
+    //BreakerDashboard.getMainTab().addBoolean("HAS NOTE", this::hasNote);
     // This method will be called once per scheduler run
   }
 }

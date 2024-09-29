@@ -16,7 +16,6 @@ import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.LED.AnimationType;
 
 import static frc.robot.Constants.BatteryTrackerConstants.*;
 
@@ -99,7 +98,7 @@ public class BatteryTracker extends SubsystemBase {
                     if (previousBatteryName.equals(batteryName.get())) {
                         // Same battery, set alert
                         sameBatteryFlag = true;
-                        led.setAnimation(AnimationType.ERROR);
+                        led.setErroring();
                         DriverStation.reportWarning("BATTERY NOT CHANGED SINCE LAST MATCH", false);
                     } else {
                         // New battery, delete file

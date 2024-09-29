@@ -101,7 +101,11 @@ public class Constants {
       
         public static final int AMP_BAR_ENCODER_ID = 35;
         public static final int AMP_BAR_MOTOR_ID = 60;
-        }
+    }
+
+    public static class HopperConstants {
+        public static final int HOPPER_ID = 33;
+    }
 
   public static class ShooterConstants {
         public static final int LEFT_FLYWHEEL_ID = 30;

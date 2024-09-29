@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.linear.Array2DRowFieldMatrix;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import dev.doglog.AdvantageKitCompatibleLogger;
@@ -63,10 +64,18 @@ public class BreakerLog extends DogLog {
     }
 
     public static void log(String key, TalonFX value) {
-        log(key + "/StatorCurrent", value.getStatorCurrent().getValue());
-        log(key + "/Position", value.getPosition().getValue());
-        log(key + "/Velocity", value.getVelocity().getValue());
+        log(key + "/StatorCurrent", value.getStatorCurrent().getValueAsDouble());
+        log(key + "/SupplyCurrent", value.getSupplyCurrent().getValueAsDouble());
+        log(key + "/Position", value.getPosition().getValueAsDouble());
+        log(key + "/Velocity", value.getVelocity().getValueAsDouble());
     }
+
+    public static void log(String key, CANcoder value) {
+        log(key + "/AbsolutePosition", value.getAbsolutePosition().getValueAsDouble());
+        log(key + "/PositionSinceBoot", value.getPositionSinceBoot().getValueAsDouble());
+        log(key + "/Velocity", value.getVelocity().getValueAsDouble());
+    }
+    
     
     public static void logMetadata(String key, String value) {
         AdvantageKitCompatibleLogger.recordMetadata(key, value);

@@ -149,7 +149,7 @@ public class Intake2 extends SubsystemBase {
  
 
   /** Dynaicly enables and disables intake rollers depeding on note visablity */
-  public Command smartRollerControlCommand(ZED zed, /*NoteVision noteVision, */ IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
+  public Command smartRollerControlCommand(ZED zed, IntakeSetpoint endSetpoint, BooleanSupplier endCondition) {
     Timer timer = new Timer();
     return new FunctionalCommand(()->{
       timer.stop();

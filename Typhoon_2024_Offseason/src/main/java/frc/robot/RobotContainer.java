@@ -36,8 +36,11 @@ import frc.robot.commands.intake.IntakeForShooter;
 import frc.robot.subsystems.AmpBar;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake2;
-import frc.robot.subsystems.Intake2.IntakeRollerState;
+import frc.robot.subsystems.Intake.IntakePivotState;
+import frc.robot.subsystems.Intake.IntakeRollerState;
+import frc.robot.subsystems.Intake.IntakeState;
 import frc.robot.subsystems.Intake2.IntakeState.IntakeSetpoint;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterTarget;
@@ -49,7 +52,7 @@ public class RobotContainer {
   public static final BreakerXboxController controller = new BreakerXboxController(0);
   private final GtsamInterface gtsamInterface = new GtsamInterface(ApriltagVisionConstants.CAMERA_NAMES);
   private final Drivetrain drivetrain = new Drivetrain(gtsamInterface);
-  private final Intake2 intake = new Intake2();
+  private final Intake intake = new Intake();
   private final Shooter shooter = new Shooter(drivetrain::getChassisAccels);
   private final Hopper hopper = new Hopper();
   private final AmpBar ampBar = new AmpBar();
@@ -113,12 +116,12 @@ public class RobotContainer {
       .onTrue(new HopperToIntakeHandoff(hopper, intake, true));
     controller.getLeftBumper()//score amp
       .and(intakeOnlyHasNote)
-      .and(() -> intake.getSetpoint().goalState().pivotAngle().equals(IntakeConstants2.PIVOT_RETRACTED_ANGLE))
+      .and(() -> intake.getState().getPivotState() == IntakePivotState.RETRACTED)
       .onTrue(new ScoreAmp(intake, ampBar));
     controller.getLeftBumper()//prep for amp score
       .and(intakeOnlyHasNote)
-      .and(() -> !intake.getSetpoint().goalState().pivotAngle().equals(IntakeConstants2.PIVOT_RETRACTED_ANGLE))
-      .onTrue(intake.setStateCommand(IntakeSetpoint.RETRACTED_NEUTRAL, false));
+      .and(() -> intake.getState().getPivotState() != IntakePivotState.RETRACTED)
+      .onTrue(intake.setStateCommand(IntakeState.RETRACTED_NEUTRAL, false));
 
     // SHOOTER CONTROLS
     controller.getRightBumper()//intake shooter

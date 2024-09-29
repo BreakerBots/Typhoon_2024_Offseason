@@ -17,13 +17,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
+import static frc.robot.Constants.HopperConstants.*;
 
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
   private WPI_TalonSRX hopperMotor;
   private HopperState state;
   public Hopper() {
-    //hopperMotor = new WPI_TalonSRX(HOPPER_ID);
+    hopperMotor = new WPI_TalonSRX(HOPPER_ID);
     hopperMotor.setNeutralMode(NeutralMode.Brake);
     hopperMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
   }

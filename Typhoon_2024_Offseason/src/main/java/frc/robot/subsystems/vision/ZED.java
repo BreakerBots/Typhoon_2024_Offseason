@@ -42,6 +42,7 @@ import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.physics.BreakerVector3;
+import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.subsystems.vision.ZED.TrackedObject;
 
 public class ZED extends SubsystemBase {
@@ -72,24 +73,12 @@ public class ZED extends SubsystemBase {
 
   public ZED(Function<Double, Pose2d> robotPoseAtTimeFunc, Function<Double, ChassisSpeeds> chassisSpeedsAtTimeFunc) {
 
-    coordinateSystem = getZedCoordinateSystem();
+    coordinateSystem = BreakerMath.getCoordinateSystemFromRotation(robotToZedLeftEye.getRotation());
   }
 
-  private CoordinateSystem getZedCoordinateSystem() {
-    BreakerVector3 zed_X = new BreakerVector3(1.0, 0.0, 0.0);
-    BreakerVector3 zed_y = new BreakerVector3(0.0, 1.0, 0.0);
-    BreakerVector3 zed_z = new BreakerVector3(1.0, 0.0, 1.0);
-    zed_X = zed_X.rotateBy(robotToZedLeftEye.getRotation());
-    zed_y = zed_y.rotateBy(robotToZedLeftEye.getRotation());
-    zed_z = zed_z.rotateBy(robotToZedLeftEye.getRotation());
-    return new CoordinateSystem(
-      new CoordinateAxis(zed_X.getX(), zed_X.getY(), zed_X.getZ()), 
-      new CoordinateAxis(zed_y.getX(), zed_y.getY(), zed_y.getZ()), 
-      new CoordinateAxis(zed_z.getX(), zed_z.getY(), zed_z.getZ()));
-  }
-
+  
   public Transform3d getRobotToCameraTransform() {
-    return ;
+    return robotToZedLeftEye;
   }
 
   private ArrayList<TrackedObject> trackedObjects;
@@ -108,9 +97,11 @@ public class ZED extends SubsystemBase {
   public static final class ObjectMotion {
     private BreakerVector3 observedCameraRelativeObjectMotion;
     private CoordinateSystem cameraCoordinateSystem;
+    private Pose3d globalRobotPose;
     ObjectMotion(double timestamp, 
     BreakerVector3 observedCameraRelativeObjectMotion, 
     Pose3d globalRobotPose,
+    ChassisSpeeds robotSpeedsInWorld,
     CoordinateSystem cameraCoordinateSystem) {
 
     }
@@ -124,7 +115,11 @@ public class ZED extends SubsystemBase {
     }
 
     public BreakerVector3 getGlobal() {
-      return ;
+      CoordinateSystem robotSys = BreakerMath.getCoordinateSystemFromRotation(globalRobotPose.getRotation());
+      Translation3d robotRel = getRobotRelative().getAsTranslation();
+      Translation3d rawWorld = CoordinateSystem.convert(robotRel, robotSys, CoordinateSystem.NWU()).minus(robotRel);
+      
+      return new BreakerVector3();
     }
   }
   
@@ -149,8 +144,8 @@ public class ZED extends SubsystemBase {
     }
 
     public Translation3d getRobotToObject(boolean compensateForLatency) {
-      Translation3d camRelTrans = getCameraToObject(compensateForLatency);
-      camRelTrans.rotateBy(null)
+      Translation3d camRelTrans = getCameraToObject(false);
+      camRelTrans.rotateBy(null);
       return null;
     }
 

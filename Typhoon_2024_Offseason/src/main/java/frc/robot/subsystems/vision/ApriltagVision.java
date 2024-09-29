@@ -5,6 +5,7 @@
 package frc.robot.subsystems.vision;
 
 import org.opencv.aruco.EstimateParameters;
+import org.opencv.photo.Photo;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.AnalogAccelerometer;
@@ -49,7 +51,8 @@ import java.util.Optional;
 import static frc.robot.Constants.DriveConstants.BACK_RIGHT_MODULE_CONSTANTS;
 
 public class ApriltagVision extends SubsystemBase {
-  /** Creates a new ApriltagVision. */
+  /** Creates a new ApriltagVision. */  
+  private static final Vector<N3> DOUBLE_MAX_VAL_VECTOR = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
   private PhotonCamera frontLeftCam, frontRightCam, backLeftCam, backRightCam;
   private PhotonCamera[] cameras;
   private Transform3d[] cameraTransforms;
@@ -114,9 +117,11 @@ public class ApriltagVision extends SubsystemBase {
             }
           }
           Vector<N3> stdDevs = calculateStdDevs(poseEst, driveState.speeds);
-          estimatedPoses.add(new Pair<EstimatedRobotPose,Vector<N3>>(poseEst, stdDevs));
-          gtsam.setCamIntrinsics(camera.getName(), camera.getCameraMatrix(), camera.getDistCoeffs());
-          gtsam.sendVisionUpdate(camera.getName(), (long)(poseEst.timestampSeconds * 1e6), toTagDetections(trackedTargets), estimator.getRobotToCameraTransform());
+          if (!stdDevs.isEqual(DOUBLE_MAX_VAL_VECTOR, 1e-5)) {
+            estimatedPoses.add(new Pair<EstimatedRobotPose,Vector<N3>>(poseEst, stdDevs));
+            gtsam.setCamIntrinsics(camera.getName(), camera.getCameraMatrix(), camera.getDistCoeffs());
+            gtsam.sendVisionUpdate(camera.getName(), (long)(poseEst.timestampSeconds * 1e6), toTagDetections(trackedTargets), estimator.getRobotToCameraTransform());
+          }
         }
       }
     }
@@ -125,6 +130,14 @@ public class ApriltagVision extends SubsystemBase {
       drivetrain.addVisionMeasurement(estPose.getFirst().estimatedPose.toPose2d(), estPose.getFirst().timestampSeconds, estPose.getSecond());
     }
   }
+
+  // private void logCamera(PhotonCamera cam) {
+  //   BreakerLog.log("ApriltagVision/Cameras/"+ cam.getName() + )
+  // }
+
+  // private void logVisionPerCameraVisionUpdate(PhotonCamera cam, EstimatedRobotPose poseEst, Vector<N3> stdDevs) {
+  //   BreakerLog.log("ApriltagVision/Cameras/" + cam.getName(), )
+  // }
 
   private void sortByStandardDeviation(ArrayList<Pair<EstimatedRobotPose, Vector<N3>>> poses) {
     int i, j;

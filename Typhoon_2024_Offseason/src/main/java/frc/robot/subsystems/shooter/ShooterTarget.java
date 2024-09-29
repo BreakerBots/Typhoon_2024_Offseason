@@ -51,6 +51,7 @@ import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 // import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake2;
 import frc.robot.subsystems.shooter.Shooter.ShooterState;
@@ -82,7 +83,7 @@ public class ShooterTarget {
         driveRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
-    public Command runSmartSpool(Intake2 intake) {
+    public Command runSmartSpool(Intake intake) {
         return shooter.runShooter(() -> {
             double dist = drivetrain.getState().Pose.getTranslation().getDistance(getTargetPosition().toTranslation2d());
             ShooterState idealState = getStationaryShooterState(dist);

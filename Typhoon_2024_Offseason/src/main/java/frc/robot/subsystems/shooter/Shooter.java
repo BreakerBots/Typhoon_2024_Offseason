@@ -176,6 +176,7 @@ public class Shooter extends SubsystemBase {
     pivot.getConfigurator().apply(config);
     pivotPosSup = pivot.getPosition().asSupplier();
     pivotVelSup = pivot.getVelocity().asSupplier();
+    lastPitchSetpointOutsideOfEpsilon = Rotation2d.fromRotations(pivotPosSup.get());
   }
 
 
