@@ -231,6 +231,7 @@ public class Intake extends SubsystemBase {
     BreakerLog.log("Intake/Threasholds/Retracted", isExtendLimitTriggered());
     BreakerLog.log("Intake/Threasholds/Amp", isExtendLimitTriggered());
     BreakerLog.log("Intake/Motors/RollerMotor", rollerMotor);
+    BreakerLog.log("Intake/Motors/RollerMotor/Temprature", rollerMotor.getDeviceTemp().getValueAsDouble());
     BreakerLog.log("Intake/Motors/LeftPivotMotor", pivotLeft);
     BreakerLog.log("Intake/Motors/rightPivotMotor", pivotRight);
     BreakerLog.log("Intake/PivotEncoder", piviotEncoder);

@@ -10,6 +10,7 @@ import org.apache.commons.math3.linear.Array2DRowFieldMatrix;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.CANSparkBase;
 
 import dev.doglog.AdvantageKitCompatibleLogger;
 import dev.doglog.DogLog;
@@ -75,7 +76,6 @@ public class BreakerLog extends DogLog {
         log(key + "/PositionSinceBoot", value.getPositionSinceBoot().getValueAsDouble());
         log(key + "/Velocity", value.getVelocity().getValueAsDouble());
     }
-    
     
     public static void logMetadata(String key, String value) {
         AdvantageKitCompatibleLogger.recordMetadata(key, value);
