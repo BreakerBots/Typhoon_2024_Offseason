@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.BreakerLib.sensors.BreakerBeamBreak;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
+
 import static frc.robot.Constants.HopperConstants.*;
 
 public class Hopper extends SubsystemBase {
@@ -80,5 +82,8 @@ public class Hopper extends SubsystemBase {
     if (RobotState.isDisabled()) {
       setState(HopperState.NEUTRAL);
     }
+    BreakerLog.log("Hopper/HasNote", hasNote());
+    BreakerLog.log("Hopper/State", state.toString());
+    BreakerLog.log("Hopper/MotorCurrent", hopperMotor.getStatorCurrent());
   }
 }

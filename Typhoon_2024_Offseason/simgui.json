@@ -2,7 +2,8 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/Robot/intake/rollerMotor": "Motor Controller"
+      "/Robot/intake/rollerMotor": "Motor Controller",
+      "/SmartDashboard/VisionSystemSim-Apriltag_Vision_Sim/Sim Field": "Field2d"
     }
   },
   "NetworkTables": {

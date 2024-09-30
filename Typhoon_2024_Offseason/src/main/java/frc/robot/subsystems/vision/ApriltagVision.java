@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.naming.spi.DirObjectFactory;
+
 import static frc.robot.Constants.DriveConstants.BACK_RIGHT_MODULE_CONSTANTS;
 
 public class ApriltagVision extends SubsystemBase {
@@ -61,7 +63,8 @@ public class ApriltagVision extends SubsystemBase {
   private GtsamInterface gtsam;
   private Drivetrain drivetrain;
   private ArrayList<Pair<EstimatedRobotPose, Vector<N3>>> estimatedPoses; 
-  public ApriltagVision(GtsamInterface gtsam) {
+  public ApriltagVision(GtsamInterface gtsam, Drivetrain drivetrain) {
+    this.drivetrain = drivetrain;
     frontLeftCam = new PhotonCamera(FRONT_LEFT_CAMERA_NAME);
       PhotonCameraSim frontLeftSim = new PhotonCameraSim(frontLeftCam, SIM_CAMERA_PROPERTIES);
     frontRightCam = new PhotonCamera(FRONT_RIGHT_CAMERA_NAME);
@@ -90,6 +93,7 @@ public class ApriltagVision extends SubsystemBase {
     for (int i = 0; i < cameras.length; i++) {
       PhotonPoseEstimator poseEstimator = new PhotonPoseEstimator(APRILTAG_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameras[i], cameraTransforms[i]);
       poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+      poseEstimators[i] = poseEstimator;
     }
   }
 

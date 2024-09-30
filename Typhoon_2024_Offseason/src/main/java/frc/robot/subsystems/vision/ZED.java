@@ -71,9 +71,10 @@ public class ZED extends SubsystemBase {
   private Transform3d robotToZedLeftEye;
   private CoordinateSystem coordinateSystem;
 
-  public ZED(Function<Double, Pose2d> robotPoseAtTimeFunc, Function<Double, ChassisSpeeds> chassisSpeedsAtTimeFunc) {
+  public ZED(Function<Double, Pose2d> robotPoseAtTimeFunc, Function<Double, ChassisSpeeds> chassisSpeedsAtTimeFunc, Transform3d robotToZedLeftEye) {
 
     coordinateSystem = BreakerMath.getCoordinateSystemFromRotation(robotToZedLeftEye.getRotation());
+    this.robotToZedLeftEye = robotToZedLeftEye;
   }
 
   

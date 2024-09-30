@@ -13,9 +13,13 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 
 import dev.doglog.DogLogOptions;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
+import frc.robot.BreakerLib.util.loging.BreakerLog.Metadata;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
 import frc.robot.Constants.AmpBarConstants;
 import frc.robot.Constants.ApriltagVisionConstants;
@@ -56,9 +61,9 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter(drivetrain::getChassisAccels);
   private final Hopper hopper = new Hopper();
   private final AmpBar ampBar = new AmpBar();
-  private final ApriltagVision apriltagVision = new ApriltagVision(gtsamInterface);
+  private final ApriltagVision apriltagVision = new ApriltagVision(gtsamInterface, drivetrain);
   
-  private final ZED zed = new ZED(null, null);
+  private final ZED zed = new ZED(null, null, new Transform3d(new Translation3d(), new Rotation3d(0.1, 3.0, 0.0)));
 
   private BreakerInputStream driverX, driverY, driverOmega;
   private SwerveRequest.FieldCentric teleopSwerveRequest;
@@ -67,9 +72,12 @@ public class RobotContainer {
   public RobotContainer() {
     shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
-    BreakerLog.setOptions(new DogLogOptions(true, false, true, true, 2000)); 
-    BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
+    BreakerLog.setOptions(new DogLogOptions(true, false, true, RobotBase.isReal(), 2000)); 
+    if (RobotBase.isReal()) {
+      BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
+    }
     BreakerLog.setEnabled(true);
+    BreakerLog.logMetadata(new Metadata("Typhoon", 2024, "Roman Abrahamson"));
   }
 
   private void configureControls() {

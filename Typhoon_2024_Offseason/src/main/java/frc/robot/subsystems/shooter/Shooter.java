@@ -68,6 +68,7 @@ import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.util.commands.TimedWaitUntilCommand;
 import frc.robot.BreakerLib.util.factory.BreakerCANCoderFactory;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerUnits;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -306,7 +307,18 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-
-    // This method will be called once per scheduler run
+   
+    ShooterState curState = getCurrentState();
+    BreakerLog.log("Shooter/AtSetpoint", atSetpoint());
+    BreakerLog.log("Shooter/Pivot/Encoder", pivotEncoder);
+    BreakerLog.log("Shooter/Pivot/Motor", pivot);
+    BreakerLog.log("Shooter/Pivot/ControlType", pitchControlType.toString());
+    BreakerLog.log("Shooter/Pivot/SetpointRotations", setpoint.pitchAngle.getRotations());
+    BreakerLog.log("Shooter/Pivot/AtSetpoint", atPivotSetpoint());
+    BreakerLog.log("Shooter/Flywheel/Velocity", curState.flywheelVel.in(Units.RotationsPerSecond));
+    BreakerLog.log("Shooter/Flywheel/Setpoint", setpoint.flywheelVel.in(Units.RotationsPerSecond));
+    BreakerLog.log("Shooter/Flywheel/AtSetpoint", atFlywheelSetpoint());
+    BreakerLog.log("Shooter/Flywheel/LeftMotor", flywheelLeft);
+    BreakerLog.log("Shooter/Flywheel/RightMotor", flywheelRight);
   }
 }

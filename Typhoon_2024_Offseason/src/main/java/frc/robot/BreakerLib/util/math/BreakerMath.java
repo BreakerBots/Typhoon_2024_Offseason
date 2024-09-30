@@ -265,7 +265,7 @@ public class BreakerMath {
     public static CoordinateSystem getCoordinateSystemFromRotation(Rotation3d rot) {
     BreakerVector3 x = new BreakerVector3(1.0, 0.0, 0.0);
     BreakerVector3 y = new BreakerVector3(0.0, 1.0, 0.0);
-    BreakerVector3 z = new BreakerVector3(1.0, 0.0, 1.0);
+    BreakerVector3 z = new BreakerVector3(0.0, 0.0, 1.0);
     x = x.rotateBy(rot);
     y = y.rotateBy(rot);
     z = z.rotateBy(rot);
