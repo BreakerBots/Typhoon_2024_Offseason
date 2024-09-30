@@ -143,7 +143,7 @@ public class Intake extends SubsystemBase {
     };
   }
 
-  public void setState(IntakeState stateToSet) {
+  void setState(IntakeState stateToSet) {
     targetState = stateToSet;
   }
 
