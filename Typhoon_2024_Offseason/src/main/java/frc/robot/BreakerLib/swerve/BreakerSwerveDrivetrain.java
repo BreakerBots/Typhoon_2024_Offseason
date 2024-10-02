@@ -22,6 +22,11 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import choreo.Choreo;
+import choreo.Choreo.ChoreoTrajectoryCache;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoFactory.ChoreoAutoBindings;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -43,11 +48,6 @@ import frc.robot.BreakerLib.auto.BreakerSwerveAutoController;
 import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
-import frc.robot.choreo.Choreo;
-import frc.robot.choreo.ChoreoAutoFactory;
-import frc.robot.choreo.ChoreoAutoLoop;
-import frc.robot.choreo.ChoreoAutoFactory.ChoreoAutoBindings;
-import frc.robot.choreo.trajectory.ChoreoTrajectory;
 import frc.robot.subsystems.Hopper;
 
 public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
@@ -64,7 +64,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   protected ChassisSpeeds prevChassisSpeeds = new ChassisSpeeds();
   protected ChassisAccels chassisAccels = new ChassisAccels();
 
-  protected ChoreoAutoFactory autoFactory;
+  protected AutoFactory autoFactory;
 
   public BreakerSwerveDrivetrain(
     BreakerSwerveDrivetrainConstants driveTrainConstants, 
@@ -176,17 +176,23 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   }
 
   private void configChoreo() {
-    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
+    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
     PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
     PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kD);
-    autoFactory = Choreo.createAutoFactory(this, () -> this.getState().Pose, new BreakerSwerveAutoController(x, y, r), (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, DRIVETRAIN_CONSTANTS.choreoAutoBindings, this::logChoreoPath);
+    autoFactory = Choreo.createAutoFactory(
+      this, 
+      () -> this.getState().Pose, 
+      new BreakerSwerveAutoController(x, y, r), 
+      (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), 
+      () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, 
+      DRIVETRAIN_CONSTANTS.choreoConfig.autoBindings, 
+      this::logChoreoPath);
   }
 
-  protected void logChoreoPath(ChoreoTrajectory trajectory, boolean started) {
-
+  protected void logChoreoPath(Trajectory trajectory, boolean started) {
   }
 
-  public ChoreoAutoFactory getAutoFactory() {
+  public AutoFactory getAutoFactory() {
     return autoFactory;
   }
 
@@ -227,14 +233,12 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   }
 
   public static class BreakerSwerveDrivetrainConstants extends SwerveDrivetrainConstants {
-    public PIDConstants pathFollowerTranslationPID = new PIDConstants(10, 0, 0);
-    public PIDConstants pathFollowerRotationPID = new PIDConstants(10, 0, 0);
-    public ReplanningConfig pathFollowerReplanningConfig = new ReplanningConfig();
     public double odometryUpdateFrequency = 250;
     public double simUpdateFrequency = 200;
     public Rotation2d blueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
     public Rotation2d redAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
-    public ChoreoAutoBindings choreoAutoBindings = new ChoreoAutoBindings();
+    public ChoreoConfig choreoConfig = new ChoreoConfig();
+    public PathplannerConfig pathplannerConfig = new PathplannerConfig();
 
     public BreakerSwerveDrivetrainConstants() {
       super();
@@ -258,21 +262,6 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       return this;
     }
 
-    public BreakerSwerveDrivetrainConstants withPathFollowerTranslationPID(PIDConstants pidConstants) {
-      pathFollowerTranslationPID = pidConstants;
-      return this;
-    }
-
-    public BreakerSwerveDrivetrainConstants withPathFollowerRotationPID(PIDConstants pidConstants) {
-      pathFollowerRotationPID = pidConstants;
-      return this;
-    }
-
-    public BreakerSwerveDrivetrainConstants withPathFollowerReplaningConfig(ReplanningConfig replanningConfig) {
-      pathFollowerReplanningConfig = replanningConfig;
-      return this;
-    }
-
     public BreakerSwerveDrivetrainConstants withOdometryUpdateFrequency(double frequencyHz) {
       odometryUpdateFrequency = frequencyHz;
       return this;
@@ -293,10 +282,59 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       return this;
     }
 
-    public BreakerSwerveDrivetrainConstants withChoreoAutoBindings(ChoreoAutoBindings autoBindings) {
-      choreoAutoBindings = autoBindings;
+    public BreakerSwerveDrivetrainConstants withChoreoConfig(ChoreoConfig choreoConfig) {
+      this.choreoConfig = choreoConfig;
       return this;
     }
 
+    public BreakerSwerveDrivetrainConstants withChoreoConfig(PathplannerConfig pathplannerConfig) {
+      this.pathplannerConfig = pathplannerConfig;
+      return this;
+    }
+
+    public static class ChoreoConfig {
+      public PIDConstants translationPID = new PIDConstants(10, 0, 0);
+      public PIDConstants rotationPID = new PIDConstants(10, 0, 0);
+      public ChoreoAutoBindings autoBindings = new ChoreoAutoBindings();
+      public ChoreoConfig() {}
+
+      public ChoreoConfig withTranslationPID(PIDConstants translationPID) {
+        this.translationPID = translationPID;
+        return this;
+      }
+
+      public ChoreoConfig withRotationPID(PIDConstants rotationPID) {
+        this.rotationPID = rotationPID;
+        return this;
+      }
+
+      public ChoreoConfig withAutoBindings(ChoreoAutoBindings autoBindings) {
+        this.autoBindings = autoBindings;
+        return this;
+      }
+    }
+
+    public static class PathplannerConfig {
+      public PIDConstants translationPID = new PIDConstants(10, 0, 0);
+      public PIDConstants rotationPID = new PIDConstants(10, 0, 0);
+      public ReplanningConfig replanningConfig = new ReplanningConfig();
+      public PathplannerConfig() {}
+
+
+      public PathplannerConfig withTranslationPID(PIDConstants translationPID) {
+        this.translationPID = translationPID;
+        return this;
+      }
+
+      public PathplannerConfig withRotationPID(PIDConstants rotationPID) {
+        this.rotationPID = rotationPID;
+        return this;
+      }
+
+      public PathplannerConfig withReplanningConfig(ReplanningConfig replanningConfig) {
+        this.replanningConfig = replanningConfig;
+        return this;
+      }
+    }
   } 
 }
