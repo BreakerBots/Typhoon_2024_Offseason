@@ -26,6 +26,7 @@ import choreo.Choreo;
 import choreo.Choreo.ChoreoTrajectoryCache;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoFactory.ChoreoAutoBindings;
+import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -45,7 +46,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.auto.BreakerSwerveAutoController;
+import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.physics.ChassisAccels;
+import frc.robot.BreakerLib.swerve.BreakerSwerveTeleopControl.HeadingCompensationConfig;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
 import frc.robot.subsystems.Hopper;
@@ -114,25 +117,25 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
   }
   
-      /**
-     * Register the specified lambda to be executed whenever our SwerveDriveState function
-     * is updated in our odometry thread.
-     * <p>
-     * It is imperative that this function is cheap, as it will be executed along with
-     * the odometry call, and if this takes a long time, it may negatively impact
-     * the odometry of this stack.
-     * <p>
-     * This can also be used for logging data if the function performs logging instead of telemetry
-     *
-     * @param telemetryFunction Function to call for telemetry or logging
-     */
-    public void registerTelemetry(Consumer<SwerveDriveState> telemetryFunction) {
-      try {
-          m_stateLock.writeLock().lock();
-          userTelemetryCallback = telemetryFunction;
-      } finally {
-          m_stateLock.writeLock().unlock();
-      }
+    /**
+   * Register the specified lambda to be executed whenever our SwerveDriveState function
+   * is updated in our odometry thread.
+   * <p>
+   * It is imperative that this function is cheap, as it will be executed along with
+   * the odometry call, and if this takes a long time, it may negatively impact
+   * the odometry of this stack.
+   * <p>
+   * This can also be used for logging data if the function performs logging instead of telemetry
+   *
+   * @param telemetryFunction Function to call for telemetry or logging
+   */
+  public void registerTelemetry(Consumer<SwerveDriveState> telemetryFunction) {
+    try {
+        m_stateLock.writeLock().lock();
+        userTelemetryCallback = telemetryFunction;
+    } finally {
+        m_stateLock.writeLock().unlock();
+    }
   }
 
   public ChassisAccels getChassisAccels() {
@@ -166,19 +169,19 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       this::seedFieldRelative,  // Consumer for seeding pose against auto
       this::getCurrentChassisSpeeds,
       (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the robot
-      new HolonomicPathFollowerConfig(constants.pathFollowerTranslationPID,
-                                      constants.pathFollowerRotationPID,
+      new HolonomicPathFollowerConfig(constants.pathplannerConfig.translationPID,
+                                      constants.pathplannerConfig.rotationPID,
                                       commonMaxModuleSpeed,
                                       driveBaseRadius,
-                                      constants.pathFollowerReplanningConfig),
+                                      constants.pathplannerConfig.replanningConfig),
       () -> DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red, // Assume the path needs to be flipped for Red vs Blue, this is normally the case
       this); // Subsystem for requirements
   }
 
   private void configChoreo() {
-    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
-    PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerTranslationPID.kD);
-    PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kP, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kI, DRIVETRAIN_CONSTANTS.pathFollowerRotationPID.kD);
+    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kD);
+    PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kD);
+    PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kD);
     autoFactory = Choreo.createAutoFactory(
       this, 
       () -> this.getState().Pose, 
@@ -189,7 +192,9 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
       this::logChoreoPath);
   }
 
-  protected void logChoreoPath(Trajectory trajectory, boolean started) {
+  protected void logChoreoPath(Trajectory<SwerveSample> trajectory, boolean isStarting) {
+    BreakerLog.log("Choreo/LastTrajectory", trajectory);
+    BreakerLog.log("Choreo/LastTrajectory/State", isStarting ? "Starting" : "Finishing");
   }
 
   public AutoFactory getAutoFactory() {
@@ -213,6 +218,10 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
   public Rotation2d getOperatorForwardDirection() {
     return m_operatorForwardDirection;
+  }
+
+  public BreakerSwerveTeleopControl getTeleopControlCommand(BreakerInputStream x, BreakerInputStream y, BreakerInputStream omega, HeadingCompensationConfig headingCompensationConfig) {
+    return new BreakerSwerveTeleopControl(this, x, y, omega, headingCompensationConfig);
   }
 
   @Override

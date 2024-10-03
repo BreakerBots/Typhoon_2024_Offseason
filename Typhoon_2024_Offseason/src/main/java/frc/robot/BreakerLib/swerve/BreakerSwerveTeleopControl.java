@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.print.DocPrintJob;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.util.PIDConstants;
 
@@ -38,10 +39,16 @@ public class BreakerSwerveTeleopControl extends Command {
   
   */
 
-  private BreakerSwerveTeleopControl(BreakerSwerveDrivetrain drivetrain, BreakerInputStream x, BreakerInputStream y, BreakerInputStream omega,  HeadingCompensationConfig headingCompensationConfig) {
+  public BreakerSwerveTeleopControl(BreakerSwerveDrivetrain drivetrain, BreakerInputStream x, BreakerInputStream y, BreakerInputStream omega, HeadingCompensationConfig headingCompensationConfig) {
     addRequirements(drivetrain);
     pid = new PIDController(headingCompensationConfig.pidConstants.kP, headingCompensationConfig.pidConstants.kI, headingCompensationConfig.pidConstants.kD);
     pid.enableContinuousInput(-Math.PI, Math.PI);
+    this.drivetrain = drivetrain;
+    this.x = x;
+    this.y = y;
+    this.omega = omega;
+    this.headingCompensationConfig = headingCompensationConfig;
+    request = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.Velocity);
   }
 
   // Called when the command is initially scheduled.

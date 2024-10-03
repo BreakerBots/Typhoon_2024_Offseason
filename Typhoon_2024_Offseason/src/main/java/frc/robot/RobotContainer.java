@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.DriveConstants.HEADING_COMPENSATION_CONFIG;
 import static frc.robot.Constants.FieldConstants.*;
 
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.BreakerLib.driverstation.BreakerInputStream;
 import frc.robot.BreakerLib.driverstation.gamepad.controllers.BreakerXboxController;
+import frc.robot.BreakerLib.swerve.BreakerSwerveTeleopControl;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.loging.BreakerLog.Metadata;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
@@ -101,8 +103,7 @@ public class RobotContainer {
             .map(new BreakerLinearizedConstrainedExponential(0.0, 3.0, true))
             .scale(Constants.DriveConstants.MAXIMUM_ROTATIONAL_VELOCITY.in(Units.RadiansPerSecond));
 
-    teleopSwerveRequest = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.Velocity);
-    drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> teleopSwerveRequest.withVelocityX(driverX.get()).withVelocityY(driverY.get()).withRotationalRate(driverOmega.get())));
+    drivetrain.setDefaultCommand(new BreakerSwerveTeleopControl(drivetrain, translationalTheta, translationalMag, translationalTheta, HEADING_COMPENSATION_CONFIG));
 
     BooleanSupplier hasNoNote = () -> !intake.hasNote() && !hopper.hasNote();
     BooleanSupplier intakeOnlyHasNote = () -> intake.hasNote() && !hopper.hasNote();

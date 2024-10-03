@@ -7,11 +7,16 @@ package frc.robot.BreakerLib.util.loging;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.linear.Array2DRowFieldMatrix;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkBase;
 
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
+import choreo.trajectory.TrajectorySample;
 import dev.doglog.AdvantageKitCompatibleLogger;
 import dev.doglog.DogLog;
 import dev.doglog.DogLogOptions;
@@ -24,9 +29,7 @@ import frc.robot.BreakerLib.physics.BreakerVector2;
 import frc.robot.BreakerLib.physics.BreakerVector3;
 import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.util.BreakerLibVersion;
-import frc.robot.choreo.ChoreoAutoTrajectory;
-import frc.robot.choreo.trajectory.ChoreoTrajectory;
-import frc.robot.choreo.trajectory.ChoreoTrajectoryState;
+
 
 /** Add your docs here. */
 public class BreakerLog extends DogLog {
@@ -51,17 +54,18 @@ public class BreakerLog extends DogLog {
         log(key + "/Alpha", value.getAlpha());
     }
 
-    public static void log(String key, ChoreoTrajectory value) {
+    public static void log(String key, Trajectory<SwerveSample> value) {
         log(key + "/Poses", value.getPoses());
-        log(key + "/InitialState", value.getInitialState());
-        log(key + "/FinalState", value.getFinalState());
+        log(key + "/InitialSample", value.getInitialSample());
+        log(key + "/FinalSample", value.getFinalSample());
         log(key + "/TotalTime", value.getTotalTime());
     }
 
-    public static void log(String key, ChoreoTrajectoryState value) {
+    public static void log(String key, SwerveSample value) {
         log(key + "/Pose", new Pose2d(value.x, value.y, Rotation2d.fromRadians(value.heading)));
-        log(key + "/ChassisSpeeds", new ChassisSpeeds(value.velocityX, value.velocityY, value.angularVelocity));
-        log(key + "/Timestamp", value.timestamp);
+        log(key + "/ChassisSpeeds", new ChassisSpeeds(value.vx, value.vy, value.omega));
+        log(key + "/ChassisAccels", new ChassisAccels(value.ax, value.ay, value.alpha));
+        log(key + "/Timestamp", value.t);
     }
 
     public static void log(String key, TalonFX value) {
@@ -76,6 +80,17 @@ public class BreakerLog extends DogLog {
         log(key + "/PositionSinceBoot", value.getPositionSinceBoot().getValueAsDouble());
         log(key + "/Velocity", value.getVelocity().getValueAsDouble());
     }
+
+    // public static void log(String key, EstimatedRobotPose value) {
+    //     log(key + "/Pose", value.estimatedPose);
+    //     log(key + "", value.targetsUsed);
+    //     log(key + )
+    // }
+
+    // public static void log(String key, PhotonTrackedTarget value) {
+    //     log(key + "/Yaw", value.yaw);
+    //     log(key + )
+    // }
     
     public static void logMetadata(String key, String value) {
         AdvantageKitCompatibleLogger.recordMetadata(key, value);

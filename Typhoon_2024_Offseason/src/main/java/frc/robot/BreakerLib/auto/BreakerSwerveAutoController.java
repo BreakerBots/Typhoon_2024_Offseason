@@ -15,7 +15,6 @@ public class BreakerSwerveAutoController implements ControlFunction<SwerveSample
 
     public BreakerSwerveAutoController(
         PIDController xController,
-        ProfiledPIDController
         PIDController yController,
         PIDController thetaController) {
         this.xController = xController;
@@ -26,20 +25,20 @@ public class BreakerSwerveAutoController implements ControlFunction<SwerveSample
 
     @Override
     public ChassisSpeeds apply(Pose2d t, SwerveSample u) {
-        double xFF = u.x;
-        double yFF = referenceState.velocityY;
-        double rotationFF = referenceState.angularVelocity;
+        double xFF = u.vx;
+        double yFF = u.vy;
+        double rotationFF = u.omega;
 
-        double xFeedback = xController.calculate(pose.getX(), referenceState.x);
-        double yFeedback = yController.calculate(pose.getY(), referenceState.y);
-        double rotationFeedback = thetaController.calculate(pose.getRotation().getRadians(),
-            referenceState.heading);
+        double xFeedback = xController.calculate(t.getX(), u.x);
+        double yFeedback = yController.calculate(t.getY(), u.y);
+        double rotationFeedback = thetaController.calculate(t.getRotation().getRadians(),
+           u.heading);
 
         ChassisSpeeds out = ChassisSpeeds.fromFieldRelativeSpeeds(
             xFF + xFeedback,
             yFF + yFeedback,
             rotationFF + rotationFeedback,
-            pose.getRotation()
+            t.getRotation()
         );
 
         return out;

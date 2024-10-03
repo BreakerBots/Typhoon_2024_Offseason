@@ -19,6 +19,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState;
 
+import dev.doglog.AdvantageKitCompatibleLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Pair;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.BreakerLib.physics.ChassisAccels;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.vision.gtsam.GtsamInterface;
 import frc.robot.subsystems.vision.gtsam.TagDetectionStruct;
@@ -94,7 +96,12 @@ public class ApriltagVision extends SubsystemBase {
       PhotonPoseEstimator poseEstimator = new PhotonPoseEstimator(APRILTAG_FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameras[i], cameraTransforms[i]);
       poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
       poseEstimators[i] = poseEstimator;
+      BreakerLog.log("ApriltagVision/Cameras" + cameras[i].getName() + "/IsConected", cameras[i].isConnected());
     }
+  }
+
+  private void logVisionFrame() {
+
   }
 
   private void updateSim(Pose2d robotPose) {
@@ -134,14 +141,6 @@ public class ApriltagVision extends SubsystemBase {
       drivetrain.addVisionMeasurement(estPose.getFirst().estimatedPose.toPose2d(), estPose.getFirst().timestampSeconds, estPose.getSecond());
     }
   }
-
-  // private void logCamera(PhotonCamera cam) {
-  //   BreakerLog.log("ApriltagVision/Cameras/"+ cam.getName() + )
-  // }
-
-  // private void logVisionPerCameraVisionUpdate(PhotonCamera cam, EstimatedRobotPose poseEst, Vector<N3> stdDevs) {
-  //   BreakerLog.log("ApriltagVision/Cameras/" + cam.getName(), )
-  // }
 
   private void sortByStandardDeviation(ArrayList<Pair<EstimatedRobotPose, Vector<N3>>> poses) {
     int i, j;

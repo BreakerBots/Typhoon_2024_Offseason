@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.BreakerLib.util.factory.BreakerCANCoderFactory;
+import frc.robot.BreakerLib.util.loging.BreakerLog;
 
 public class AmpBar extends SubsystemBase {
   public enum AmpBarState {
@@ -136,5 +137,8 @@ public class AmpBar extends SubsystemBase {
     else {
       sparkFlex.set(0.0);
     }
+    BreakerLog.log("AmpBar/Encoder", canCoder);
+    BreakerLog.log("AmpBar/State", currentState);
+    BreakerLog.log("AmpBar/MotorCurrent", sparkFlex.getOutputCurrent());
   }
 }

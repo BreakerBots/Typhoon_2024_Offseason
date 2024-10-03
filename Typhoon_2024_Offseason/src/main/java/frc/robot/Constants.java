@@ -18,6 +18,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -37,6 +38,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import frc.robot.BreakerLib.swerve.BreakerSwerveDrivetrain.BreakerSwerveDrivetrainConstants;
+import frc.robot.BreakerLib.swerve.BreakerSwerveTeleopControl.HeadingCompensationConfig;
 import frc.robot.BreakerLib.util.MechanismRatio;
 import frc.robot.BreakerLib.util.math.BreakerUnits;
 import frc.robot.subsystems.shooter.Shooter.ShooterState;
@@ -213,6 +215,7 @@ public class Constants {
     }
 
     public static class DriveConstants {
+        public static final HeadingCompensationConfig HEADING_COMPENSATION_CONFIG = new HeadingCompensationConfig(Units.MetersPerSecond.of(0.05), Units.RadiansPerSecond.of(0.001), new PIDConstants(2.8, 0, 0));
         public static final Measure<Velocity<Distance>> MAXIMUM_TRANSLATIONAL_VELOCITY = Units.MetersPerSecond.of(4.5);
         public static final Measure<Velocity<Angle>> MAXIMUM_ROTATIONAL_VELOCITY = Units.RadiansPerSecond.of(9.5);
       // Both sets of gains need to be tuned to your individual robot.
