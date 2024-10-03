@@ -11,7 +11,9 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.revrobotics.CANSparkBase;
 
 import choreo.trajectory.SwerveSample;
@@ -79,6 +81,22 @@ public class BreakerLog extends DogLog {
         log(key + "/AbsolutePosition", value.getAbsolutePosition().getValueAsDouble());
         log(key + "/PositionSinceBoot", value.getPositionSinceBoot().getValueAsDouble());
         log(key + "/Velocity", value.getVelocity().getValueAsDouble());
+    }
+
+    public static void log(String key, Pigeon2 value) {
+        log(key + "/Abs");
+    }
+
+    public static void log(String key, SwerveModule value) {
+        log(key + "/DriveMotor", value.getDriveMotor());
+        log(key + "/SteerMotor", value.getSteerMotor());
+        log(key + "/SteerEncoder", value.getCANcoder());
+    }
+
+    public static void log(String key, SwerveModule... value) {
+        for (int i = 0; i < value.length; i++) {
+            log(key + "/" + i, value[i]);
+        }
     }
 
     // public static void log(String key, EstimatedRobotPose value) {

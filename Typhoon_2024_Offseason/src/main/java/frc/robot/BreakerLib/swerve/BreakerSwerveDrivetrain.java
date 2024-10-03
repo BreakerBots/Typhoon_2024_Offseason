@@ -14,6 +14,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -104,17 +105,23 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     chassisAccels = ChassisAccels.fromDeltaSpeeds(prevChassisSpeeds, state.speeds, state.OdometryPeriod);
     prevChassisSpeeds = state.speeds;
     
-    BreakerLog.log("SwerveDrivetrain/Pose", state.Pose);
-    BreakerLog.log("SwerveDrivetrain/Speeds", state.speeds);
-    BreakerLog.log("SwerveDrivetrain/ModuleStates", state.ModuleStates);
-    BreakerLog.log("SwerveDrivetrain/TargetModuleStates", state.ModuleTargets);
-    BreakerLog.log("SwerveDrivetrain/SuccessfulDAQs", state.SuccessfulDaqs);
-    BreakerLog.log("SwerveDrivetrain/FailedDAQs", state.FailedDaqs);
-    BreakerLog.log("SwerveDrivetrain/OdometryPeriod", state.OdometryPeriod);
+    BreakerLog.log("SwerveDrivetrain/State/Pose", state.Pose);
+    BreakerLog.log("SwerveDrivetrain/State/Speeds", state.speeds);
+    BreakerLog.log("SwerveDrivetrain/State/Accels", chassisAccels);
+    BreakerLog.log("SwerveDrivetrain/State/ModuleStates", state.ModuleStates);
+    BreakerLog.log("SwerveDrivetrain/State/TargetModuleStates", state.ModuleTargets);
+    BreakerLog.log("SwerveDrivetrain/State/SuccessfulDAQs", state.SuccessfulDaqs);
+    BreakerLog.log("SwerveDrivetrain/State/FailedDAQs", state.FailedDaqs);
+    BreakerLog.log("SwerveDrivetrain/State/OdometryPeriod", state.OdometryPeriod);
     
     if (userTelemetryCallback != null) {
       userTelemetryCallback.accept(state);
     }
+  }
+
+  private void lowFrequencyTelemetry() {
+    BreakerLog.log("SwerveDrivetrain/Modules", Modules);
+    BreakerLog.log("SwerveDrivetrain/IMU", getPigeon2());
   }
   
     /**
@@ -239,6 +246,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
               hasAppliedOperatorPerspective = true;
         });
       }
+      lowFrequencyTelemetry();
   }
 
   public static class BreakerSwerveDrivetrainConstants extends SwerveDrivetrainConstants {
