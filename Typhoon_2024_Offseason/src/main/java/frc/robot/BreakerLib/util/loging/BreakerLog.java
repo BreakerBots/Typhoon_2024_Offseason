@@ -22,9 +22,13 @@ import choreo.trajectory.TrajectorySample;
 import dev.doglog.AdvantageKitCompatibleLogger;
 import dev.doglog.DogLog;
 import dev.doglog.DogLogOptions;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import frc.robot.BuildConstants;
 import frc.robot.BreakerLib.physics.BreakerVector2;
@@ -84,7 +88,16 @@ public class BreakerLog extends DogLog {
     }
 
     public static void log(String key, Pigeon2 value) {
-        log(key + "/Abs");
+        Rotation3d rot = value.getRotation3d();
+        log(key + "/Gyro/AnglesRad/Yaw", rot.getZ());
+        log(key + "/Gyro/AnglesRad/Pitch", rot.getY());
+        log(key + "/Gyro/AnglesRad/Roll", rot.getX());
+        log(key + "/Gyro/AngleRates/YawRate", Units.degreesToRadians(value.getAngularVelocityZWorld().getValueAsDouble()));
+        log(key + "/Gyro/AngleRates/PitchRate", Units.degreesToRadians(value.getAngularVelocityYWorld().getValueAsDouble()));
+        log(key + "/Gyro/AngleRates/RollRate", Units.degreesToRadians(value.getAngularVelocityXWorld().getValueAsDouble()));
+        log(key + "/Accelerometer/X", value.getAccelerationX().getValueAsDouble());
+        log(key + "/Accelerometer/Y", value.getAccelerationY().getValueAsDouble());
+        log(key + "/Accelerometer/Z", value.getAccelerationZ().getValueAsDouble());
     }
 
     public static void log(String key, SwerveModule value) {
@@ -147,5 +160,10 @@ public class BreakerLog extends DogLog {
         public Metadata(String robotName, int year, String authors) {
             this(robotName, year, authors, WPILibVersion.Version, BreakerLibVersion.version, BuildConstants.MAVEN_NAME, BuildConstants.GIT_REVISION, BuildConstants.GIT_SHA, BuildConstants.GIT_DATE, BuildConstants.GIT_BRANCH, BuildConstants.BUILD_DATE, BuildConstants.DIRTY);
         }
+    }
+
+    public static void updateDynamicPublishNT() {
+        boolean shouldPub = DriverStation.isDSAttached() && !DriverStation.isFMSAttached();
+        setOptions(options.withNtPublish(shouldPub));
     }
 }

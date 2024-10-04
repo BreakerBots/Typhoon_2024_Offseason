@@ -75,7 +75,6 @@ public class Intake extends SubsystemBase {
     piviotEncoder = new CANcoder(PIVOT_ENCODER_ID);
 
     BreakerCANCoderFactory.configExistingCANCoder(piviotEncoder, AbsoluteSensorRangeValue.Signed_PlusMinusHalf, PIVOT_ENCODER_OFFSET, SensorDirectionValue.CounterClockwise_Positive);
-    
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     pivotConfig.CurrentLimits.SupplyCurrentLimit = 30;

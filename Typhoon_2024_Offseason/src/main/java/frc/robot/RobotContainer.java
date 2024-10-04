@@ -74,7 +74,7 @@ public class RobotContainer {
   public RobotContainer() {
     shooter.setDefaultCommand(SPEAKER.runSmartSpool(intake));
     configureControls();
-    BreakerLog.setOptions(new DogLogOptions(true, false, true, RobotBase.isReal(), 2000)); 
+    BreakerLog.setOptions(new DogLogOptions(true, false, true, true, 2000)); 
     if (RobotBase.isReal()) {
       BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
     }

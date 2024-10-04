@@ -121,7 +121,7 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
   private void lowFrequencyTelemetry() {
     BreakerLog.log("SwerveDrivetrain/Modules", Modules);
-    BreakerLog.log("SwerveDrivetrain/IMU", getPigeon2());
+    BreakerLog.log("SwerveDrivetrain/Pigeon2", getPigeon2());
   }
   
     /**
