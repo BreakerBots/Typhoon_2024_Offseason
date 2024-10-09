@@ -4,7 +4,6 @@
 
 package frc.robot.BreakerLib.swerve;
 
-import static frc.robot.Constants.DriveConstants.DRIVETRAIN_CONSTANTS;
 import static java.lang.Math.abs;
 
 import java.util.function.Consumer;
@@ -52,7 +51,6 @@ import frc.robot.BreakerLib.physics.ChassisAccels;
 import frc.robot.BreakerLib.swerve.BreakerSwerveTeleopControl.HeadingCompensationConfig;
 import frc.robot.BreakerLib.util.loging.BreakerLog;
 import frc.robot.BreakerLib.util.math.BreakerMath;
-import frc.robot.subsystems.Hopper;
 
 public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
 
@@ -186,16 +184,16 @@ public class BreakerSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
   }
 
   private void configChoreo() {
-    PIDController x = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kD);
-    PIDController y = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.translationPID.kD);
-    PIDController r = new PIDController(DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kP, DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kI, DRIVETRAIN_CONSTANTS.choreoConfig.rotationPID.kD);
+    PIDController x = new PIDController(constants.choreoConfig.translationPID.kP, constants.choreoConfig.translationPID.kI, constants.choreoConfig.translationPID.kD);
+    PIDController y = new PIDController(constants.choreoConfig.translationPID.kP, constants.choreoConfig.translationPID.kI, constants.choreoConfig.translationPID.kD);
+    PIDController r = new PIDController(constants.choreoConfig.rotationPID.kP, constants.choreoConfig.rotationPID.kI, constants.choreoConfig.rotationPID.kD);
     autoFactory = Choreo.createAutoFactory(
       this, 
       () -> this.getState().Pose, 
       new BreakerSwerveAutoController(x, y, r), 
       (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), 
       () -> {return DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red;}, 
-      DRIVETRAIN_CONSTANTS.choreoConfig.autoBindings, 
+      constants.choreoConfig.autoBindings, 
       this::logChoreoPath);
   }
 

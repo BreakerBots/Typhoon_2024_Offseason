@@ -4,8 +4,6 @@
 
 package frc.robot.BreakerLib.physics;
 
-import static frc.robot.Constants.AmpBarConstants.RETRACTED_ANGLE_THRESHOLD;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;

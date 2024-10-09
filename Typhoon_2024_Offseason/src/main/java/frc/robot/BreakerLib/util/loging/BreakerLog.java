@@ -6,15 +6,10 @@ package frc.robot.BreakerLib.util.loging;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.linear.Array2DRowFieldMatrix;
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
-import com.revrobotics.CANSparkBase;
 
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
