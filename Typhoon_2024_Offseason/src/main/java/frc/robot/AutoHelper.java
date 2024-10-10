@@ -18,8 +18,6 @@ public class AutoHelper {
         
         AutoTrajectory startToFirstNote = null;
 
-
-        startToFirstNote.done().onTrue()
         return null;
     }
 }
