@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import frc.robot.BreakerLib.swerve.BreakerSwerveDrivetrain.BreakerSwerveDrivetrainConstants;
 import frc.robot.BreakerLib.swerve.BreakerSwerveTeleopControl.HeadingCompensationConfig;
 import frc.robot.BreakerLib.util.MechanismRatio;
+import frc.robot.BreakerLib.util.loging.BreakerLog.GitInfo;
 import frc.robot.BreakerLib.util.math.BreakerUnits;
 import frc.robot.subsystems.shooter.Shooter.ShooterState;
 
@@ -48,6 +49,7 @@ public class Constants {
 
   public static class GeneralConstants {
     public static final String DRIVE_CANIVORE_NAME = "drive_canivore";
+    public static final GitInfo GIT_INFO = new GitInfo(BuildConstants.MAVEN_NAME, BuildConstants.GIT_REVISION, BuildConstants.GIT_SHA, BuildConstants.GIT_DATE, BuildConstants.GIT_BRANCH, BuildConstants.BUILD_DATE, BuildConstants.DIRTY);
   }
 
   public static class FieldConstants {

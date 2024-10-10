@@ -34,6 +34,7 @@ import frc.robot.BreakerLib.util.loging.BreakerLog.Metadata;
 import frc.robot.BreakerLib.util.math.functions.BreakerLinearizedConstrainedExponential;
 import frc.robot.Constants.AmpBarConstants;
 import frc.robot.Constants.ApriltagVisionConstants;
+import frc.robot.Constants.GeneralConstants;
 import frc.robot.Constants.IntakeConstants2;
 import frc.robot.commands.amp.ScoreAmp;
 import frc.robot.commands.intake.HopperToIntakeHandoff;
@@ -79,7 +80,7 @@ public class RobotContainer {
       BreakerLog.setPdh(new PowerDistribution(0, ModuleType.kRev));
     }
     BreakerLog.setEnabled(true);
-    BreakerLog.logMetadata(new Metadata("Typhoon", 2024, "Roman Abrahamson"));
+    BreakerLog.logMetadata(new Metadata("Typhoon", 2024, "Roman Abrahamson", GeneralConstants.GIT_INFO));
   }
 
   private void configureControls() {
@@ -103,7 +104,7 @@ public class RobotContainer {
             .map(new BreakerLinearizedConstrainedExponential(0.0, 3.0, true))
             .scale(Constants.DriveConstants.MAXIMUM_ROTATIONAL_VELOCITY.in(Units.RadiansPerSecond));
 
-    drivetrain.setDefaultCommand(new BreakerSwerveTeleopControl(drivetrain, translationalTheta, translationalMag, translationalTheta, HEADING_COMPENSATION_CONFIG));
+    drivetrain.setDefaultCommand(new BreakerSwerveTeleopControl(drivetrain, driverX, driverY, driverOmega, HEADING_COMPENSATION_CONFIG));
 
     BooleanSupplier hasNoNote = () -> !intake.hasNote() && !hopper.hasNote();
     BooleanSupplier intakeOnlyHasNote = () -> intake.hasNote() && !hopper.hasNote();
